@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-base: #0a0a0a;
+  --bg-card: #171717;
+  --bg-elevated: #262626;
+  --bg-hover: #404040;
+  --border-color: #262626;
+  --text-primary: #f0f0f0;
+  --text-secondary: #a3a3a3;
+  --text-tertiary: #737373;
+}
+
+.light {
+  --bg-base: #f8f8f8;
+  --bg-card: #ffffff;
+  --bg-elevated: #f0f0f0;
+  --bg-hover: #e5e5e5;
+  --border-color: #d4d4d4;
+  --text-primary: #171717;
+  --text-secondary: #525252;
+  --text-tertiary: #737373;
+}
+
+@layer base {
+  * {
+    border-color: var(--border-color);
+  }
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    @apply antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+  button, a, input, select, textarea {
+    @apply transition-all duration-200 ease-out;
+  }
+}
+
+@layer components {
+  .bg-base { background-color: var(--bg-base); }
+  .bg-card { background-color: var(--bg-card); }
+  .bg-elevated { background-color: var(--bg-elevated); }
+  .bg-hover { background-color: var(--bg-hover); }
+  .text-primary-custom { color: var(--text-primary); }
+  .text-secondary-custom { color: var(--text-secondary); }
+  .text-tertiary-custom { color: var(--text-tertiary); }
+  .border-base { border-color: var(--border-color); }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--bg-hover);
+    @apply rounded-full;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
