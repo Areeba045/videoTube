@@ -32,6 +32,10 @@ router.route("/all").get(getAllVideos) ;
 
 router.route("/c/:search").get(searchVideos);
 
+router.route("/my-videos").get(verifyJwt , getMyVideos);
+
+router.route("/toggle/published/:videoId").patch(verifyJwt , togglePublishStatus);
+
 router.route("/:videoId").get( optionalVerifyJwt , getVideoById).delete( verifyJwt , deleteVideos);
 
 router.route("/:videoId").patch(verifyJwt , upload.fields([
@@ -43,8 +47,5 @@ router.route("/:videoId").patch(verifyJwt , upload.fields([
         maxCount : 1
     }
 ]) , updateVideos );
-router.route("/toggle/published/:videoId").patch(verifyJwt , togglePublishStatus);
-
-router.route("/my-videos").get(verifyJwt , getMyVideos);
 
 export default router ;

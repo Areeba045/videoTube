@@ -61,6 +61,8 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
       const response: any = await getMyVideos();
 
       const normalizeVideos = (response.data || []).map(normalizeVideo);
+
+    setMyVideos(normalizeVideos);
     } catch (error) {
       console.error("Failed to load my videos:", error);
     }
@@ -106,7 +108,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
 
       const newVideo = normalizeVideo(response.data);
 
-      setVideos((currentVideos) => [newVideo, ...currentVideos]);
+      setMyVideos((currentVideos) => [newVideo, ...currentVideos]);
 
       //Only public videos belong in the public feed
       if (newVideo.privacy === "public") {
