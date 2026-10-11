@@ -66,7 +66,11 @@ export default function Header({
 
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
-    navigate(searchInput.trim() ? `/?q=${encodeURIComponent(searchInput.trim())}` : "/");
+    navigate(
+      searchInput.trim()
+        ? `/?q=${encodeURIComponent(searchInput.trim())}`
+        : "/",
+    );
   }
 
   return (
@@ -161,7 +165,6 @@ export default function Header({
                       </span>
                     )}
                   </div>
-                  {/* <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" /> */}
                 </button>
                 {showUserMenu && (
                   <div className="absolute right-0 mt-2 w-56 bg-card rounded-xl shadow-xl border border-base overflow-hidden animate-scale-in">

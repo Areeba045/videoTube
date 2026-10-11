@@ -118,15 +118,9 @@ export function CommentProvider({ children }: { children: ReactNode }) {
       const response = await getVideoComments(videoId);
 
       const backendComments = response.data || [];
-
-      console.log("RAW COMMENTS AFTER REFRESH:", backendComments);
-      console.log("CURRENT USER ID:" /* don't add this here yet */);
-
       const normalizedComments = backendComments.map(normalizeComment);
 
       setComments(normalizedComments);
-
-      console.log("COMMENTS FROM BACKEND:", normalizedComments);
     } catch (error) {
       console.error("Failed to load comments:", error);
       setComments([]);
@@ -144,8 +138,6 @@ export function CommentProvider({ children }: { children: ReactNode }) {
       const newComment: Comment = {
         ...normalizeComment(backendComment),
 
-        // Backend addComment currently returns only the owner ID,
-        // so use current logged-in user for immediate UI.
         userId: currentUser.id,
 
         user: {
@@ -189,70 +181,40 @@ export function CommentProvider({ children }: { children: ReactNode }) {
     },
     [],
   );
+  const updateComment = useCallback(
+    async (commentId: string, newContent: string) => {
+      const response = await updateCommentApi(commentId, newContent);
+      const updatedComment = normalizeComment(response.data);
 
-  // const updateComment = useCallback(
-  //   async (commentId: string, newContent: string) => {
-  //     const response = await updateCommentApi(commentId, newContent);
+      // Update the comment at any nesting level
+      const updateNestedComment = (comments: Comment[]): Comment[] => {
+        return comments.map((comment) => {
+          if (comment.id === commentId) {
+            return {
+              ...comment,
+              text: updatedComment.text,
+              createdAt: updatedComment.createdAt,
+            };
+          }
 
-  //     const updatedComment = normalizeComment(response.data);
+          if (comment.replies?.length) {
+            return {
+              ...comment,
+              replies: updateNestedComment(comment.replies),
+            };
+          }
 
-  //     setComments((previous) =>
-  //       previous.map((comment) =>
-  //         comment.id === commentId
-  //           ? {
-  //               ...comment,
-  //               text: updatedComment.text,
-  //               createdAt: updatedComment.createdAt,
-  //             }
-  //           : comment,
-  //       ),
-  //     );
-  //   },
-  //   [],
-  // );
+          return comment;
+        });
+      };
 
-
-
-const updateComment = useCallback(
-  async (commentId: string, newContent: string) => {
-    const response = await updateCommentApi(commentId, newContent);
-    const updatedComment = normalizeComment(response.data);
-
-    // Update the comment at any nesting level
-    const updateNestedComment = (comments: Comment[]): Comment[] => {
-      return comments.map((comment) => {
-        if (comment.id === commentId) {
-          return {
-            ...comment,
-            text: updatedComment.text,
-            createdAt: updatedComment.createdAt,
-          };
-        }
-
-        if (comment.replies?.length) {
-          return {
-            ...comment,
-            replies: updateNestedComment(comment.replies),
-          };
-        }
-
-        return comment;
-      });
-    };
-
-    setComments((previous) => updateNestedComment(previous));
-  },
-  [],
-);
+      setComments((previous) => updateNestedComment(previous));
+    },
+    [],
+  );
 
   const deleteComment = useCallback(async (commentId: string) => {
     await deleteCommentApi(commentId);
-
-    // setComments((previous) =>
-    //   previous.filter(
-    //     (comment) => comment.id !== commentId,
-    //   ),
-    // );
     setComments((previous) => removeCommentFromTree(previous, commentId));
   }, []);
 

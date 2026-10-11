@@ -1,89 +1,3 @@
-// import { createContext , useContext , useState , ReactNode } from "react";
-
-// import { toggleVideoLike , getLikeVideos  , type ReactionType  } from "@/services/likeApi";
-
-// interface LikeContextType {
-//     likedVideos : any[] ;
-//     loading :  boolean ;
-
-//     toggleLike : (videoId : string , type : ReactionType) => Promise<{
-//         reaction : ReactionType | null ;
-//         likeCount : number ;
-//         dislikeCount : number ;
-//     }>
-
-//     loadLikedVideos : () => Promise<void>;
-// }
-
-
-
-// const LikeContext = createContext<LikeContextType | undefined >(undefined)
-
-// export const  LikeProvider = ({ children } : { children : ReactNode}) => {
-
-//     const [likedVideos , setLikedVideos] = useState<any[]>([]);
-//     const [ loading , setLoading ] = useState(false);
-
-//     const toggleLike = async (
-//         videoId : string ,
-//         type :  ReactionType
-//     ) => {
-//         const response = await toggleVideoLike(videoId , type);
-
-//         return response.data ;
-
-//     }
-
-
-
-//     const loadLikedVideos = async () => {
-//         try {
-//             setLoading(true);
-
-//             const response = await getLikeVideos();
-
-//             setLikedVideos(response.data || []);
-
-//         } catch (error) {
-//             console.error("Failed to load liked videos :" , error);
-//             setLikedVideos([]);
-//         }finally{
-//             setLoading(false);
-//         }
-//     }
-
-
-
-
-
-//     return (
-//         <LikeContext.Provider
-//         value={{
-//             likedVideos, 
-//             loadLikedVideos ,
-//             loading ,
-//             toggleLike ,
-//         }}>
-//             {children}
-//         </LikeContext.Provider>
-//     )
-// }
-
-// export const useLike = () => {
-//     const context = useContext(LikeContext);
-
-//     if(!context){
-//         throw new Error(
-//             "useLike must be used inside LikeProvider"
-//         );
-//     }
-
-//     return context ;
-    
-// }
-
-
-
 import {
   createContext,
   useContext,
@@ -96,7 +10,7 @@ import {
   toggleVideoLike,
   getLikeVideos,
   type ReactionType,
-  type ToggleLikeResponse ,
+  type ToggleLikeResponse,
 } from "@/services/likeApi";
 
 interface LikeContextType {
@@ -107,26 +21,17 @@ interface LikeContextType {
 
   toggleLike: (
     videoId: string,
-    type: ReactionType
+    type: ReactionType,
   ) => Promise<ToggleLikeResponse>;
 
-  syncReaction: (
-    videoId: string,
-    reaction: ReactionType | null
-  ) => void;
+  syncReaction: (videoId: string, reaction: ReactionType | null) => void;
 
   loadLikedVideos: () => Promise<void>;
 }
 
-const LikeContext = createContext<LikeContextType | undefined>(
-  undefined
-);
+const LikeContext = createContext<LikeContextType | undefined>(undefined);
 
-export const LikeProvider = ({
-  children,
-}: {
-  children: ReactNode;
-}) => {
+export const LikeProvider = ({ children }: { children: ReactNode }) => {
   const [likedVideos, setLikedVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -134,123 +39,66 @@ export const LikeProvider = ({
     Record<string, ReactionType | null>
   >({});
 
-//   const syncReaction = useCallback(
-//     (videoId: string, reaction: ReactionType | null) => {
-//       setReactions((previous) => ({
-//         ...previous,
-//         [videoId]: reaction,
-//       }));
-//     },
-//     []
-//   );
-
-const syncReaction = useCallback(
-  (videoId: string, reaction: ReactionType | null) => {
-    setReactions((previous) => ({
-      ...previous,
-      [videoId]: reaction,
-    }));
-  },
-  []
-);
+  const syncReaction = useCallback(
+    (videoId: string, reaction: ReactionType | null) => {
+      setReactions((previous) => ({
+        ...previous,
+        [videoId]: reaction,
+      }));
+    },
+    [],
+  );
 
   const toggleLike = async (
-  videoId: string,
-  type: ReactionType
-): Promise<ToggleLikeResponse> => {
-  const response = await toggleVideoLike(videoId, type);
+    videoId: string,
+    type: ReactionType,
+  ): Promise<ToggleLikeResponse> => {
+    const response = await toggleVideoLike(videoId, type);
 
-  const  { reaction }= response.data;
+    const { reaction } = response.data;
 
-  // Update reaction state immediately after backend success
-  syncReaction(videoId, reaction);
+    syncReaction(videoId, reaction);
 
-  // Keep likedVideos in sync too
-//   setLikedVideos((previous) => {
-//     if (newReaction === "like") {
-//       return previous;
-//     }
+    if (reaction === "like") {
+      await loadLikedVideos();
+    } else {
+      setLikedVideos((previous) =>
+        previous.filter((item: any) => item.video?._id !== videoId),
+      );
+    }
+    return response.data;
+  };
 
-//     return previous.filter(
-//       (item: any) => item.video?._id !== videoId
-//     );
-//   });
+  const loadLikedVideos = useCallback(async () => {
+    try {
+      setLoading(true);
 
+      const response = await getLikeVideos();
 
-  // Keep liked videos synchronized
-  if (reaction === "like") {
-    await loadLikedVideos();
-  } else {
-    setLikedVideos((previous) =>
-      previous.filter(
-        (item: any) => item.video?._id !== videoId
-      )
-    );
-  }
-  return response.data;
-};
+      const likedData = response.data || [];
 
-//   const toggleLike = async (
-//     videoId: string,
-//     type: ReactionType
-//   ): Promise<ReactionType | null> => {
-//     const response = await toggleVideoLike(videoId, type);
+      setLikedVideos(likedData);
 
-//     const newReaction = response.data.reaction;
+      setReactions((previous) => {
+        const next = { ...previous };
 
-//     syncReaction(videoId, newReaction);
+        likedData.forEach((item: any) => {
+          if (item.video?._id) {
+            next[item.video._id] = item.reactionType;
+          }
+        });
 
-//     return newReaction;
-//   };
-
-//   const loadLikedVideos = useCallback(async () => {
-//     try {
-//       setLoading(true);
-
-//       const response = await getLikeVideos();
-
-//       setLikedVideos(response.data || []);
-//       console.log("LIKED VIDEOS RESPONSE:", response.data);
-//     } catch (error) {
-//       console.error("Failed to load liked videos:", error);
-//       setLikedVideos([]);
-//     } finally {
-//       setLoading(false);
-//     }
-//   } ,[]);
-
-
-const loadLikedVideos = useCallback(async () => {
-  try {
-    setLoading(true);
-
-    const response = await getLikeVideos();
-
-    const likedData = response.data || [];
-
-    setLikedVideos(likedData);
-
-    setReactions((previous) => {
-      const next = { ...previous };
-
-      likedData.forEach((item: any) => {
-        if (item.video?._id) {
-          next[item.video._id] = item.reactionType;
-        }
+        return next;
       });
 
-      return next;
-    });
-
-    console.log("LIKED VIDEOS RESPONSE:", likedData);
-  } catch (error) {
-    console.error("Failed to load liked videos:", error);
-    setLikedVideos([]);
-  } finally {
-    setLoading(false);
-  }
-}, []);
-
+      console.log("LIKED VIDEOS RESPONSE:", likedData);
+    } catch (error) {
+      console.error("Failed to load liked videos:", error);
+      setLikedVideos([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   return (
     <LikeContext.Provider

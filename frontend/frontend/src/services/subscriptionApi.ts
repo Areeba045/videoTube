@@ -1,23 +1,3 @@
-// import { apiFetch } from "@/utils/api";
-
-
-
-// export async function getSubscribedChannels(){
-//     return apiFetch("/subscription/subscribed");
-// }
-
-
-// export async function getChannelSuscribers(channelId : string){
-//     return apiFetch(`/subscription/c/${channelId}`)
-// }
-
-
-// export async function toggelSubscrition(channelId : string){
-//     return apiFetch(`/subscription/c/${channelId}` , {
-//         method : "POST"
-//     })
-// }
-
 
 import { apiFetch } from "@/utils/api";
 

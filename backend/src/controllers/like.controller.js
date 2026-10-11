@@ -7,7 +7,6 @@ import { Video } from "../models/video.model.js";
 import { Comment } from "../models/comments.model.js";
 import { Tweet } from "../models/tweets.model.js";
 
-
 const toggleVideoLike = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   //TODO : TOGGLE LIKE ON VIDEOS / DISLIKE
@@ -210,18 +209,15 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     }),
   ]);
 
-  return res.status(200).json(
-    new ApiResponse(
-      200,
-      { reaction, likeCount, dislikeCount },
-      "Comment reaction updated successfully"
-    )
-  );
-});
-
-const toggleTweetLike = asyncHandler(async (req, res) => {
-  const { tweetId } = req.params;
-  //TODO : TOGGLE LIKE ON TWEET
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { reaction, likeCount, dislikeCount },
+        "Comment reaction updated successfully"
+      )
+    );
 });
 
 const getLikedvideos = asyncHandler(async (req, res) => {

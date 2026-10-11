@@ -84,7 +84,7 @@ import { Like } from "../models/like.model.js";
 //     //     as: "replies",
 //     //   },
 //     // },
-    
+
 // {
 //   $lookup: {
 //     from: "comments",
@@ -257,7 +257,7 @@ import { Like } from "../models/like.model.js";
 //     //     },
 //     //   },
 //     // },
-    
+
 // {
 //   $addFields: {
 //     likesCount: {
@@ -386,8 +386,6 @@ import { Like } from "../models/like.model.js";
 //     .json(new ApiResponse(200, videoComments, "Get Video All comments "));
 // });
 
-
-
 const getVideoComment = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   const page = Math.max(1, Number(req.query.page) || 1);
@@ -453,16 +451,13 @@ const getVideoComment = asyncHandler(async (req, res) => {
       parentComment: comment.parentComment,
       createdAt: comment.createdAt,
       owner: comment.owner,
-      likesCount: commentReactions.filter(
-        (r) => r.reactionType === "like"
-      ).length,
-      dislikeCount: commentReactions.filter(
-        (r) => r.reactionType === "dislike"
-      ).length,
+      likesCount: commentReactions.filter((r) => r.reactionType === "like")
+        .length,
+      dislikeCount: commentReactions.filter((r) => r.reactionType === "dislike")
+        .length,
       userReaction:
-        commentReactions.find(
-          (r) => r.likedBy.toString() === currentUserId
-        )?.reactionType ?? null,
+        commentReactions.find((r) => r.likedBy.toString() === currentUserId)
+          ?.reactionType ?? null,
       replies: [],
     });
   }
@@ -481,13 +476,13 @@ const getVideoComment = asyncHandler(async (req, res) => {
   }
 
   // Return only top-level comments; replies are nested inside them.
-  const result = topComments.map(
-    (comment) => nodeMap.get(comment._id.toString())
+  const result = topComments.map((comment) =>
+    nodeMap.get(comment._id.toString())
   );
 
-  return res.status(200).json(
-    new ApiResponse(200, result, "Comments loaded successfully")
-  );
+  return res
+    .status(200)
+    .json(new ApiResponse(200, result, "Comments loaded successfully"));
 });
 
 const addComment = asyncHandler(async (req, res) => {
@@ -537,7 +532,6 @@ const addReply = asyncHandler(async (req, res) => {
   const parentComment = await Comment.findOne({
     _id: commentId,
     video: videoId,
-    // parentComment: null,
   });
 
   if (!parentComment) {
@@ -646,23 +640,6 @@ const deleteComment = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(200, {}, "Comment and its replies deleted successfully")
     );
-
-  const deletecomment = await Comment.findOneAndDelete({
-    _id: commentId,
-    owner: req.user._id,
-  });
-
-  if (!deletecomment) {
-    throw new ApiError(404, "There was problem for while delteing a comment ");
-  }
-
-  await Like.deleteMany({
-    comment: commentId,
-  });
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, {}, "Comment was deleted successfully "));
 });
 
 export { getVideoComment, addReply, addComment, updateComment, deleteComment };

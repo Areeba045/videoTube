@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState , useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import type { Video } from "@/types";
 
 import {
@@ -12,8 +18,6 @@ import {
 } from "../services/videoApi.ts";
 
 import { useToast } from "@/components/Toast.tsx";
-// import { currentUser } from "@/data.ts";
-// import { currentUser } from "@/data.ts";
 
 interface PublishData {
   title: string;
@@ -63,7 +67,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
 
       const normalizeVideos = (response.data || []).map(normalizeVideo);
 
-    setMyVideos(normalizeVideos);
+      setMyVideos(normalizeVideos);
     } catch (error) {
       console.error("Failed to load my videos:", error);
     }
@@ -111,7 +115,6 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
 
       setMyVideos((currentVideos) => [newVideo, ...currentVideos]);
 
-      //Only public videos belong in the public feed
       if (newVideo.privacy === "public") {
         setVideos((currentVideos) => [newVideo, ...currentVideos]);
       }
@@ -122,7 +125,6 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
 
       showToast(message, "error");
       throw error;
-
     } finally {
       setLoading(false);
     }
@@ -178,16 +180,6 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     try {
       await togglePublishStatus(videoId);
 
-      /*
-        Backend should return updated video.
-        If your backend returns it inside data,
-        this will update our UI.
-      */
-
-      // if (response && typeof response === "object" && "data" in response) {
-      // const updatedVideo = normalizeVideo((response as any).data);
-
-      //update owners videos
       setMyVideos((currentVideos) =>
         currentVideos.map((video) =>
           video.id === videoId
@@ -198,8 +190,6 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
             : video,
         ),
       );
-
-      // update public feed
       setVideos((currentVideos) => {
         const existingVideo = currentVideos.find(
           (video) => video.id === videoId,
@@ -228,17 +218,6 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
         );
       });
       showToast("Video privacy update ", "success");
-
-      // } else {
-      //   /*
-      //     If backend doesn't return
-      //     the updated video, reload videos.
-      //   */
-
-      //   await fetchVideos();
-      // }
-
-      // showToast("Publish status updated!");
     } catch (error) {
       const message =
         error instanceof Error
@@ -250,45 +229,19 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-
-// function updateVideoViews(videoId: string, views: number) {
-//   setVideos((currentVideos) =>
-//     currentVideos.map((video) =>
-//       video.id === videoId
-//         ? { ...video, views }
-//         : video,
-//     ),
-//   );
-
-//   setMyVideos((currentVideos) =>
-//     currentVideos.map((video) =>
-//       video.id === videoId
-//         ? { ...video, views }
-//         : video,
-//     ),
-//   );
-// }
-
-const updateVideoViews = useCallback(
-  (videoId: string, views: number) => {
+  const updateVideoViews = useCallback((videoId: string, views: number) => {
     setVideos((currentVideos) =>
       currentVideos.map((video) =>
-        video.id === videoId
-          ? { ...video, views }
-          : video,
+        video.id === videoId ? { ...video, views } : video,
       ),
     );
 
     setMyVideos((currentVideos) =>
       currentVideos.map((video) =>
-        video.id === videoId
-          ? { ...video, views }
-          : video,
+        video.id === videoId ? { ...video, views } : video,
       ),
     );
-  },
-  [],
-);
+  }, []);
 
   return (
     <VideoContext.Provider
@@ -303,7 +256,7 @@ const updateVideoViews = useCallback(
         deleteVideo,
         updateVideo,
         togglePublish,
-        updateVideoViews ,
+        updateVideoViews,
       }}
     >
       {children}

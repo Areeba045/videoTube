@@ -26,28 +26,17 @@ export interface Video {
   likes: number;
   dislikes: number;
   tags: string[];
-  watchedAt? : string ;
-  privacy: 'public' | 'private' ;
-  owner? : {
-    _id : string ;
-    username? : string ;
-    fullName : string ;
-    avatar? : string ;
-    
-  }
-  historyId : string ;
+  watchedAt?: string;
+  privacy: "public" | "private";
+  owner?: {
+    _id: string;
+    username?: string;
+    fullName: string;
+    avatar?: string;
+  };
+  historyId: string;
   isSubscribed?: boolean;
 }
-
-// export interface Comment {
-//   id: string;
-//   videoId: string;
-//   userId: string;
-//   text: string;
-//   likes: number;
-//   createdAt: string;
-//   replies: Comment[];
-// }
 
 export interface Comment {
   id: string;
@@ -55,8 +44,8 @@ export interface Comment {
   userId: string;
   text: string;
   likes: number;
-  dislikes: number ;
-  userReaction : "like" | "dislike" | null;
+  dislikes: number;
+  userReaction: "like" | "dislike" | null;
   createdAt: string;
   replies: Comment[];
 
@@ -71,32 +60,22 @@ export interface Comment {
 export interface Playlist {
   id: string;
   name: string;
-  description: string ;
+  description: string;
   videoIds: string[];
   icon: string;
 }
 
+export type ViewName =
+  | "home"
+  | "subscriptions"
+  | "library"
+  | "liked"
+  | "history"
+  | "playlist"
+  | "channel"
+  | "settings";
 
-
-// export interface Playlist {
-//     _id : string ;
-//     name: string ;
-//     description : string ;
-//     owner : string | {
-//         _id : string ;
-//         fullName : string ;
-//         username : string ;
-//         avatar? : string ;
-//     };
-//     videos : any[];
-//     createdAt? : string ;
-//     updatedAt? : string ;
-
-// }
-
-export type ViewName = 'home' | 'subscriptions' | 'library' | 'liked' | 'history' | 'playlist' | 'channel' | 'settings';
-
-export type Privacy = 'public' | 'private' | 'unlisted';
+export type Privacy = "public" | "private" | "unlisted";
 
 export interface AuthUser {
   id: string;

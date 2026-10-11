@@ -38,22 +38,18 @@ const uploadOnCloudinary = async (LocalFilePath) => {
   }
 };
 
-const deleteFromCloudinary =  async(public_id) => {
+const deleteFromCloudinary = async (public_id) => {
   try {
-    if(!public_id) return null ;
-    const response = await cloudinary.uploader.destroy(
-      public_id ,
-      {
-        resource_type : "auto"
-      }
-    )
-    console.log("Cloudinary delete response :" , response );
-    return response ;
-    
+    if (!public_id) return null;
+    const response = await cloudinary.uploader.destroy(public_id, {
+      resource_type: "auto",
+    });
+    console.log("Cloudinary delete response :", response);
+    return response;
   } catch (error) {
-    console.log("Cloudinary delete error : " , error);
+    console.log("Cloudinary delete error : ", error);
     return null;
   }
-} 
+};
 
-export { uploadOnCloudinary , deleteFromCloudinary };
+export { uploadOnCloudinary, deleteFromCloudinary };

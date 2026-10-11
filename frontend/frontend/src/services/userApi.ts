@@ -51,18 +51,20 @@ export const loginUser = async (email: string, password: string) => {
 };
 
 export const refreshAccessToken = async () => {
-  return apiFetch("/users/refresh-token" , {
-    method : "POST",
-  })
-}
-export const getCurrentUser = async () => {
-  const response = await apiFetch<{ data: BackendUser }>("/users/current-user", {
-    method: "GET",
+  return apiFetch("/users/refresh-token", {
+    method: "POST",
   });
+};
+export const getCurrentUser = async () => {
+  const response = await apiFetch<{ data: BackendUser }>(
+    "/users/current-user",
+    {
+      method: "GET",
+    },
+  );
 
   return normalizeUser(response.data);
 };
-
 
 export const logoutUser = async () => {
   return apiFetch("/users/logout", {
@@ -92,8 +94,8 @@ export const changePassword = async (
   oldPassword: string,
   newPassword: string,
 ) => {
-  console.log("ChangE Password API Called")
-  const response = await  apiFetch("/users/change-password", {
+  console.log("ChangE Password API Called");
+  const response = await apiFetch("/users/change-password", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -104,7 +106,7 @@ export const changePassword = async (
     }),
   });
 
-  console.log("CHANGE PASSWORD RESPONSE: " , response);
+  console.log("CHANGE PASSWORD RESPONSE: ", response);
 
   return response;
 };
@@ -140,7 +142,12 @@ export const getWatchHistory = async () => {
 
 export const getSubscribedChannels = async () => {
   const response = await apiFetch<{
-    data: SubscriptionRecord[] | { channels?: SubscriptionRecord[]; subscriptions?: SubscriptionRecord[] };
+    data:
+      | SubscriptionRecord[]
+      | {
+          channels?: SubscriptionRecord[];
+          subscriptions?: SubscriptionRecord[];
+        };
   }>("/subscriptions");
   const subscriptions = Array.isArray(response.data)
     ? response.data

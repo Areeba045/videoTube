@@ -141,7 +141,9 @@ const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   //TODO : GET VIDEO BY ID
 
-  const currentUserId = req.user?._id ? new mongoose.Types.ObjectId(req.user._id) : null ;
+  const currentUserId = req.user?._id
+    ? new mongoose.Types.ObjectId(req.user._id)
+    : null;
 
   if (!isValidObjectId(videoId)) {
     throw new Api(400, "This videoId is not exists");
@@ -214,15 +216,15 @@ const getVideoById = asyncHandler(async (req, res) => {
         commentsCount: {
           $size: "$comments",
         },
-        isSubscribed : {
-          $cond : {
-            if : { $eq : [currentUserId , null]} ,
-            then :  false ,
-            else : {
-              $in : [currentUserId , "$subscriber.subscriber"]
-            }
-          }
-        } ,
+        isSubscribed: {
+          $cond: {
+            if: { $eq: [currentUserId, null] },
+            then: false,
+            else: {
+              $in: [currentUserId, "$subscriber.subscriber"],
+            },
+          },
+        },
         likesCount: {
           $size: {
             $filter: {
@@ -296,7 +298,7 @@ const getVideoById = asyncHandler(async (req, res) => {
         subscriberCount: 1,
         currentUserReaction: 1,
         dislikeCount: 1,
-        isSubscribed : 1 , 
+        isSubscribed: 1,
       },
     },
   ]);

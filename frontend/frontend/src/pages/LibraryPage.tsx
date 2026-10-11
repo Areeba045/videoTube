@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getAllVideos  , normalizeVideo } from "@/services/videoApi";
-import { getPlaylistById , normalizePlaylist  } from "@/services/playlistApi";
+import { getAllVideos, normalizeVideo } from "@/services/videoApi";
+import { getPlaylistById, normalizePlaylist } from "@/services/playlistApi";
 import type { Playlist, User, Video } from "@/types";
 import VideoFeedPage from "@/pages/VideoFeedPage";
 import { feedIcons } from "@/pages/feedIcons";
@@ -18,7 +18,10 @@ interface LibraryPageProps {
   onRemoveFromPlaylist: (playlistId: string, videoId: string) => void;
   onCreatePlaylist: (name: string, description: string) => void;
   onDeletePlaylist: (playlistId: string) => Promise<void>;
-  onUpdatePlaylist? : (playlistId : string , data : { name? : string ; description ? : string ;}) => Promise<void>;
+  onUpdatePlaylist?: (
+    playlistId: string,
+    data: { name?: string; description?: string },
+  ) => Promise<void>;
 }
 
 export default function LibraryPage({
@@ -38,8 +41,9 @@ export default function LibraryPage({
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [selectedPlaylist, setSelectedPlaylist] =
-  useState<Playlist | undefined>(undefined);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<
+    Playlist | undefined
+  >(undefined);
 
   useEffect(() => {
     let cancelled = false;
@@ -64,87 +68,57 @@ export default function LibraryPage({
   }, []);
 
   useEffect(() => {
-  if (
-    mode !== "playlist" ||
-    !selectedPlaylistId
-  ) {
-    return;
-  }
+    if (mode !== "playlist" || !selectedPlaylistId) {
+      return;
+    }
 
-  let cancelled = false;
+    let cancelled = false;
 
-  setSelectedPlaylist(undefined);
+    setSelectedPlaylist(undefined);
 
-  getPlaylistById(selectedPlaylistId)
-    .then((response) => {
-      if (cancelled) return;
+    getPlaylistById(selectedPlaylistId)
+      .then((response) => {
+        if (cancelled) return;
 
-      const playlistData =
-        normalizePlaylist(response.data);
+        const playlistData = normalizePlaylist(response.data);
 
-      setSelectedPlaylist(
-        playlistData
-      );
-    })
-    .catch((error) => {
-      if (cancelled) return;
+        setSelectedPlaylist(playlistData);
+      })
+      .catch((error) => {
+        if (cancelled) return;
 
-      console.error(
-        "Failed to get playlist by ID:",
-        error
-      );
-    });
+        console.error("Failed to get playlist by ID:", error);
+      });
 
-  return () => {
-    cancelled = true;
-  };
-}, [mode, selectedPlaylistId]);
-  // const playlist = playlists.find((item) => item.id === selectedPlaylistId);
-  const playlist = mode === "playlist" ? selectedPlaylist : playlists.find((item) => item.id === selectedPlaylistId) 
-  
+    return () => {
+      cancelled = true;
+    };
+  }, [mode, selectedPlaylistId]);
+  const playlist =
+    mode === "playlist"
+      ? selectedPlaylist
+      : playlists.find((item) => item.id === selectedPlaylistId);
+
   const filteredVideos = useMemo(() => {
+    // 1. Liked Videos
+    if (mode === "liked") {
+      return videos.filter((video) => likedVideoIds.has(String(video.id)));
+    }
 
-  // 1. Liked Videos
-  if (mode === "liked") {
-    return videos.filter((video) =>
-      likedVideoIds.has(String(video.id))
+    // 2. Specific Playlist
+    if (mode === "playlist") {
+      const playlistVideoIds = new Set((playlist?.videoIds || []).map(String));
+
+      return videos.filter((video) => playlistVideoIds.has(String(video.id)));
+    }
+
+    // 3. Library: All saved playlist videos
+    const savedIds = new Set(
+      playlists.flatMap((item) => item.videoIds.map(String)),
     );
-  }
 
-  // 2. Specific Playlist
-  if (mode === "playlist") {
-    const playlistVideoIds = new Set(
-      (playlist?.videoIds || []).map(String)
-    );
-
-    return videos.filter((video) =>
-      playlistVideoIds.has(String(video.id))
-    );
-  }
-
-  // 3. Library: All saved playlist videos
-  const savedIds = new Set(
-    playlists.flatMap((item) =>
-      item.videoIds.map(String)
-    )
-  );
-
-  return videos.filter((video) =>
-    savedIds.has(String(video.id))
-  );
-
-}, [mode, videos, likedVideoIds, playlist, playlists]);
-
-  // const filteredVideos = useMemo(() => {
-  //   if (mode === "liked")
-  //     return videos.filter((video) => likedVideoIds.has(video.id));
-  //   // if (mode === "playlist")
-  //   //   return (playlist?.videoIds || [])
-  //   //     .map((id) => videos.find((video) => video.id === id))
-  //   //     .filter((video): video is Video => Boolean(video));
-  //   const savedIds = new Set(playlists.flatMap((item) => item.videoIds));
-  //   return videos.filter((video) => savedIds.has(video.id));
-  // }, [mode, videos, likedVideoIds, playlist, playlists]);
+    return videos.filter((video) => savedIds.has(String(video.id)));
+  }, [mode, videos, likedVideoIds, playlist, playlists]);
 
   const config =
     mode === "liked"
@@ -184,7 +158,6 @@ export default function LibraryPage({
       icon={config.icon}
       videos={filteredVideos}
       allVideoCount={videos.length}
-      // getUserById={getUserById}
       playlists={playlists}
       activePlaylistId={selectedPlaylistId}
       emptyMessage={config.empty}

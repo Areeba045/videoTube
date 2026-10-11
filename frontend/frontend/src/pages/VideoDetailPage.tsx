@@ -4,16 +4,14 @@ import VideoDetail from "@/components/VideoDetail";
 import { useVideos } from "@/contexts/VideoContext";
 import { useLike } from "@/contexts/likeContext";
 import type { ReactionType } from "@/services/likeApi";
-import { toggleCommentLike  } from "@/services/likeApi";
+import { toggleCommentLike } from "@/services/likeApi";
 import {
   getAllVideos,
   getVideoById,
   normalizeVideo,
 } from "@/services/videoApi";
-// import { api } from "@/utils/api";
-// import { comments as initialComments } from "@/data";
 import { useComments } from "@/contexts/CommentsContext";
-import type { Comment, Playlist, User, Video } from "@/types";
+import type { Playlist, User, Video } from "@/types";
 import { useToast } from "@/components/Toast";
 import { useSubscriptions } from "@/contexts/SubscriptionContext";
 import { addtoWatchHistory } from "@/services/historyApi";
@@ -37,20 +35,20 @@ export default function VideoDetailPage({
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { updateVideoViews } = useVideos();
-  // const { toggleSubscription: toggleSubscriptionContext } = useSubscriptions();
   const [video, setVideo] = useState<Video | null>(null);
   const [relatedVideos, setRelatedVideos] = useState<Video[]>([]);
-  // const [comments, setComments] = useState<Comment[]>([]);
-  // const [likedVideos, setLikedVideos] = useState<Set<string>>(new Set());
-  // const [dislikedVideos, setDislikedVideos] = useState<Set<string>>(new Set());
-  const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
-  // const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const { reactions, toggleLike, loadLikedVideos, syncReaction } = useLike();
 
-  const { comments, loadComments, addComment, addReply ,  updateComment, deleteComment } =
-    useComments();
+  const {
+    comments,
+    loadComments,
+    addComment,
+    addReply,
+    updateComment,
+    deleteComment,
+  } = useComments();
 
   const {
     toggleSubscription: toggleSubscriptionContext,
@@ -92,9 +90,6 @@ export default function VideoDetailPage({
 
         console.log("NORMALIZED VIDEO DISLIKES:", loadedVideo.dislikes);
 
-        // console.log("VIDEO RESPONSE:", videoResponse.data);
-        // console.log("UPDATED VIEWS:", loadedVideo.views);
-
         const loadedVideos = (allVideosResponse.data || []).map(normalizeVideo);
         setVideo(loadedVideo);
 
@@ -102,8 +97,6 @@ export default function VideoDetailPage({
           loadedVideo.id,
           loadedVideo.currentUserReaction as ReactionType | null,
         );
-
-        // Backend already incremented the view. // Now sync that new count with global VideoContext.
         updateVideoViews(loadedVideo.id, loadedVideo.views);
         setRelatedVideos(
           loadedVideos
@@ -112,11 +105,6 @@ export default function VideoDetailPage({
             )
             .slice(0, 8),
         );
-        // setComments(
-        //   initialComments.filter(
-        //     (comment) => comment.videoId === loadedVideo.id,
-        //   ),
-        // );
       })
       .catch((requestError) => {
         if (!cancelled)
@@ -133,13 +121,6 @@ export default function VideoDetailPage({
       cancelled = true;
     };
   }, [videoId, updateVideoViews]);
-  //  const channelId = video?.owner?._id || video?.channelId;
-
-  // useEffect(() => {
-  //   if (!channelId) return;
-
-  //   fetchSubscriberCount(channelId);
-  // }, [channelId, fetchSubscriberCount]);
 
   const channelId = video?.owner?._id || video?.channelId;
 
@@ -169,23 +150,17 @@ export default function VideoDetailPage({
       </div>
     );
   }
-  // const channel = getUserById(video.channelId) ||
-  // { id: video.channelId, name: "Unknown channel", handle: "", avatar: "", subscribers: 0, isSubscribed: false };
-
-  // const channel = video.owner ;
 
   const channel: User = {
     id: channelId,
     name: video.owner?.fullName || video.owner?.username || "Unknown channel",
     handle: video.owner?.username || "",
     avatar: video.owner?.avatar || "",
-    // subscribers: 0,
     subscribers: subscriberCounts[channelId] ?? 0,
     isSubscribed: isSubscribed(channelId),
   };
 
-  // const subscribe = isSubscribed(channel.id);
-  const subscribe = video.isSubscribed ?? false ;
+  const subscribe = video.isSubscribed ?? false;
 
   const handleToggleLike = async (id: string) => {
     if (!currentUser) {
@@ -216,46 +191,6 @@ export default function VideoDetailPage({
       showToast("Failed to update like", "error");
     }
   };
-  // const handleToggleLike = async (id: string) => {
-  //   if (!currentUser) {
-  //     showToast("Please login to like this video");
-  //     return;
-  //   }
-
-  //   try {
-  //     const reaction = await toggleLike(id, "like");
-
-  //     showToast(
-  //       reaction === "like" ? "Video liked!" : "Like removed",
-  //       "success",
-  //     );
-  //   } catch (error) {
-  //     console.error("Like Failed:", error);
-  //     showToast("Failed to update like", "error");
-  //   }
-  // setLikedVideos((previous) => {
-  //   const next = new Set(previous);
-  //   if (next.has(id)) next.delete(id);
-  //   else next.add(id);
-  //   return next;
-  // });
-  // setDislikedVideos((previous) => {
-  //   const next = new Set(previous);
-  //   next.delete(id);
-  //   return next;
-  // });
-  // await api.toggleLike(id);
-  // };
-
-  //   const handleToggleSubscribe = async (channelId: string) => {
-
-  //     if (!currentUser) {
-  //     showToast("Please login to like this video");
-  //     return;
-  // }const next = !subscribed;
-  //     setSubscribed(next);
-  //     await api.toggleSubscribe(channelId);
-  //   };
 
   const handleToggleSubscribe = async (channelId: string) => {
     if (!currentUser) {
@@ -266,16 +201,14 @@ export default function VideoDetailPage({
     try {
       const next = await toggleSubscriptionContext(channelId);
 
-      // setSubscribed(next);
-
-       setVideo((prev) =>
-      prev
-        ? {
-            ...prev,
-            isSubscribed: next,
-          }
-        : prev,
-    );
+      setVideo((prev) =>
+        prev
+          ? {
+              ...prev,
+              isSubscribed: next,
+            }
+          : prev,
+      );
 
       showToast(
         next ? "Subscribed!" : "Unsubscribed",
@@ -288,25 +221,6 @@ export default function VideoDetailPage({
     }
   };
 
-  // const handleToggleDislike = async (id: string) => {
-  //   if (!currentUser) {
-  //     showToast("Please login to dislike this video");
-  //     return;
-  //   }
-
-  //   try {
-  //     const reaction = await toggleLike(id, "dislike");
-
-  //     showToast(
-  //       reaction === "dislike" ? "Video disliked!" : "Dislike removed",
-  //       "success",
-  //     );
-  //   } catch (error) {
-  //     console.error("Dislike failed:", error);
-  //     showToast("Failed to update reaction", "error");
-  //   }
-  // };
-
   const handleToggleDislike = async (id: string) => {
     if (!currentUser) {
       showToast("Please login to dislike this video");
@@ -316,7 +230,6 @@ export default function VideoDetailPage({
     try {
       const response = await toggleLike(id, "dislike");
 
-      // Update both counts immediately
       setVideo((previous) => {
         if (!previous) return previous;
 
@@ -337,39 +250,20 @@ export default function VideoDetailPage({
     }
   };
 
-  // const handleAddComment = async (id: string, text: string) => {
-  //   if (!currentUser) {
-  //     showToast("Please login to like this video");
-  //     return;
-  //   }
-  //   const comment = await api.addComment(id, text);
-  //   setComments((previous) => [comment, ...previous]);
-  //   showToast("Comment posted!");
-  // };
+  const handleAddReply = async (commentId: string, text: string) => {
+    if (!currentUser) {
+      console.error("You must be logged in to reply.");
+      return;
+    }
 
-  
-const handleAddReply = async (
-  commentId: string,
-  text: string,
-) => {
-  if (!currentUser) {
-    console.error("You must be logged in to reply.");
-    return;
-  }
+    if (!text.trim()) return;
 
-  if (!text.trim()) return;
-
-  try {
-    await addReply(
-      video.id,
-      commentId,
-      text.trim(),
-      currentUser,
-    );
-  } catch (error) {
-    console.error("Failed to add reply:", error);
-  }
-};
+    try {
+      await addReply(video.id, commentId, text.trim(), currentUser);
+    } catch (error) {
+      console.error("Failed to add reply:", error);
+    }
+  };
 
   const handleAddComment = async (id: string, text: string) => {
     if (!currentUser) {
@@ -421,77 +315,33 @@ const handleAddReply = async (
     }
   };
 
-  // const handleLikeComment = (commentId: string) => {
-  //   setLikedComments((previous) => {
-  //     const next = new Set(previous);
-  //     if (next.has(commentId)) next.delete(commentId);
-  //     else next.add(commentId);
-  //     return next;
-  //   });
-  //   // setComments((previous) =>
-  //   //   previous.map((comment) =>
-  //   //     comment.id === commentId
-  //   //       ? {
-  //   //           ...comment,
-  //   //           likes: likedComments.has(commentId)
-  //   //             ? comment.likes - 1
-  //   //             : comment.likes + 1,
-  //   //         }
-  //   //       : comment,
-  //   //   ),
-  //   // );
-  // };
+  const handleLikeComment = async (
+    commentId: string,
+    type: "like" | "dislike",
+  ) => {
+    if (!currentUser) {
+      showToast("Please login to react to a comment");
+      return;
+    }
 
-//   const handleLikeComment = async (commentId: string) => {
-//   if (!currentUser) {
-//     showToast("Please login to like a comment");
-//     return;
-//   }
+    if (!videoId) return;
 
-//   if (!videoId) return;
+    try {
+      console.log("Reacting to comment/reply ID:", commentId, type);
 
-//   try {
-//     await toggleCommentLike(commentId, "like");
+      await toggleCommentLike(commentId, type);
 
-//     // Reload comments so the displayed count comes from the backend.
-//     await loadComments(videoId);
+      await loadComments(videoId);
 
-//     showToast("Comment reaction updated!", "success");
-//   } catch (error) {
-//     console.error("Failed to like comment:", error);
-//     showToast("Failed to update comment like", "error");
-//   }
-// };
-
-
-const handleLikeComment = async (
-  commentId: string,
-  type: "like" | "dislike" 
-) => {
-  if (!currentUser) {
-    showToast("Please login to react to a comment");
-    return;
-  }
-
-  if (!videoId) return;
-
-  try {
-    console.log("Reacting to comment/reply ID:", commentId, type);
-
-    await toggleCommentLike(commentId, type);
-
-    await loadComments(videoId);
-
-    showToast(
-      type === "like" ? "Comment liked!" : "Comment disliked!",
-      "success",
-    );
-  } catch (error) {
-    console.error("Comment/reply reaction failed:", error);
-    showToast("Failed to update comment reaction", "error");
-  }
-};
-
+      showToast(
+        type === "like" ? "Comment liked!" : "Comment disliked!",
+        "success",
+      );
+    } catch (error) {
+      console.error("Comment/reply reaction failed:", error);
+      showToast("Failed to update comment reaction", "error");
+    }
+  };
 
   const handleShare = async () => {
     try {

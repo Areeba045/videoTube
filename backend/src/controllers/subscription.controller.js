@@ -5,7 +5,6 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Subscription } from "../models/subscription.model.js";
 
-
 const toggleSubscription = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
   //TODO : TOGGLE SUBSCRIPTION
@@ -82,8 +81,8 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 
 const getSubscribedChannels = asyncHandler(async (req, res) => {
   if (!req.user?._id) {
-  throw new ApiError(401, "Unauthorized request");
-}
+    throw new ApiError(401, "Unauthorized request");
+  }
 
   const subscribedChannels = await Subscription.aggregate([
     {

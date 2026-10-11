@@ -14,9 +14,9 @@ const likeSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    reactionType : {
-      type : String ,
-      enum : ["like" , "dislike"]
+    reactionType: {
+      type: String,
+      enum: ["like", "dislike"],
     },
     tweet: {
       type: Schema.Types.ObjectId,
@@ -28,10 +28,8 @@ const likeSchema = new Schema(
 
 // A user can have only one reaction per video.
 likeSchema.index(
-  { video :  1 , likedBy : 1 } ,
-  { unique : true ,
-    partialFilterExpression : { video : {$type: "objectId"}},
-  }
+  { video: 1, likedBy: 1 },
+  { unique: true, partialFilterExpression: { video: { $type: "objectId" } } }
 );
 
 // A user can have only one reaction per comment.
@@ -42,17 +40,5 @@ likeSchema.index(
     partialFilterExpression: { comment: { $type: "objectId" } },
   }
 );
-
-
-
-// A user can have only one reaction per tweet.
-// likeSchema.index(
-//   { tweet: 1, likedBy: 1 },
-//   {
-//     unique: true,
-//     partialFilterExpression: { tweet: { $type: "objectId" } },
-//   }
-// );
-
 
 export const Like = mongoose.model("Like", likeSchema);

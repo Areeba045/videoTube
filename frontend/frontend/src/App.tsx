@@ -39,19 +39,15 @@ function AppContent() {
   const { showToast } = useToast();
   const { publishVideo, deleteVideo } = useVideos();
   const { fetchSubscribedChannels, clearSubscriptions } = useSubscriptions();
-  // const handleSaveToPlaylist = addVideoToPlaylist ;
-  // const handleRemoveFromPlaylist =removeVideoFromPlaylist t;
-  // const handleCreatePlaylist = createPlaylist;
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  // const [likedVideos] = useState<Set<string>>(new Set(["v3", "v6"]));
   const [defaultPublishPrivacy, setDefaultPublishPrivacy] =
     useState<Privacy>("public");
   const currentUser = authUser;
-  // const { fetchUserPlaylists } = usePlaylists();
+
 
   const handleCreatePlaylist = async (name: string, description: string) => {
     try {
@@ -61,7 +57,7 @@ function AppContent() {
       console.error("Create Playlist error : ", error);
       showToast("Failed to create Plalylist");
     }
-    // await createPlaylist(name, description);
+
   };
 
   const handleSaveToPlaylist = async (PlaylistId: string, videoId: string) => {
@@ -206,10 +202,6 @@ function AppContent() {
                   getUserById={getUserById}
                   onSaveToPlaylist={handleSaveToPlaylist}
                   onCreatePlaylist={handleCreatePlaylist}
-                />
-                // ) : (
-                //   <Navigate to="/" replace />
-                // )
               }
             />
             <Route
@@ -248,7 +240,6 @@ function AppContent() {
               element={
                 <ChannelPage
                   channel={currentUser}
-                  // videos={[]}
                   currentUser={currentUser}
                   isSubscribed={false}
                   onDeleteVideo={deleteVideo}

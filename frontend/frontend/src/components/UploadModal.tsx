@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import {
   X,
   UploadCloud,
@@ -14,25 +14,16 @@ import { useVideos } from "@/contexts/VideoContext";
 
 interface UploadModalProps {
   onClose: () => void;
-  // onPublish: (data: {
-  //   title: string;
-  //   description: string;
-  //   privacy: Privacy;
-  //   thumbnail: File | null;
-  //   video: File;
-  // }) => Promise<void>;
   defaultPrivacy?: Privacy;
 }
 
 export default function UploadModal({
   onClose,
-  // onPublish,
   defaultPrivacy = "public",
 }: UploadModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [fileName, setFileName] = useState<string | null>(null);
-  // const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
   const [thumbnailName, setThumbnailName] = useState<string | null>(null);
@@ -48,51 +39,6 @@ export default function UploadModal({
   const thumbInputRef = useRef<HTMLInputElement>(null);
 
   const { publishVideo } = useVideos();
-
-  // useEffect(() => {
-  //   if (!videoUploading) return;
-  //   setUploadProgress(0);
-  //   const interval = setInterval(() => {
-  //     setUploadProgress((prev) => {
-  //       if (prev >= 100) {
-  //         clearInterval(interval);
-  //         return 100;
-  //       }
-  //       return prev + 5;
-  //     });
-  //   }, 50);
-  //   return () => clearInterval(interval);
-  // }, [videoUploading]);
-
-  // useEffect(() => {
-  //   if (uploadProgress >= 100 && videoUploading) {
-  //     setVideoUploading(false);
-  //   }
-  // }, [uploadProgress, videoUploading]);
-
-  //   async function handleUpload() {
-  //   if (!videoFile) {
-  //     return;
-  //   }
-
-  //   try {
-  //     await publishVideo({
-  //       title,
-  //       description,
-  //       privacy ,
-  //       thumbnail: thumbnailFile,
-  //       video: videoFile,
-  //     });
-
-  //     onClose();
-
-  //   } catch (error) {
-  //     console.error(
-  //       "Upload failed:",
-  //       error
-  //     );
-  //   }
-  // }
 
   function handleVideoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -197,17 +143,6 @@ export default function UploadModal({
           </button>
         </div>
 
-        {/* {published ? (
-          <div className="p-12 text-center animate-scale-in">
-            <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 className="w-8 h-8 text-success" />
-            </div>
-            <h3 className="text-lg font-bold mb-2">Video Published!</h3>
-            <p className="text-sm text-secondary-custom">
-              Your video is now live on VideoTube.
-            </p>
-          </div>
-        ) : ( */}
         {published ? (
           <div className="p-12 text-center animate-scale-in">
             <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">

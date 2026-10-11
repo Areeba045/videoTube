@@ -13,8 +13,8 @@ export interface BackendComment {
   };
   createdAt: string;
   likesCount?: number;
-  dislikeCount? : number;
-  userReaction? : "like" | "dislike" | null ;
+  dislikeCount?: number;
+  userReaction?: "like" | "dislike" | null;
   commentReaction?: {
     _id: string;
     likedBy: string;
@@ -22,8 +22,8 @@ export interface BackendComment {
     comment: string;
   }[];
 
-  parentComment? : string | null ;
-  replies? : BackendComment[];
+  parentComment?: string | null;
+  replies?: BackendComment[];
 }
 
 export interface CommentApiResponse {
@@ -33,9 +33,6 @@ export interface CommentApiResponse {
   success?: boolean;
 }
 
-/**
- * Get all comments of a video
- */
 export const getVideoComments = async (
   videoId: string,
   page = 1,
@@ -46,13 +43,7 @@ export const getVideoComments = async (
   );
 };
 
-/**
- * Add a new comment
- */
-export const addComment = async (
-  videoId: string,
-  content: string,
-) => {
+export const addComment = async (videoId: string, content: string) => {
   return apiFetch<{
     statusCode: number;
     data: BackendComment;
@@ -64,13 +55,7 @@ export const addComment = async (
   });
 };
 
-/**
- * Update comment
- */
-export const updateComment = async (
-  commentId: string,
-  newContent: string,
-) => {
+export const updateComment = async (commentId: string, newContent: string) => {
   return apiFetch<{
     statusCode: number;
     data: BackendComment;
@@ -82,9 +67,7 @@ export const updateComment = async (
   });
 };
 
-/**
- * Delete comment
- */
+
 export const deleteComment = async (commentId: string) => {
   return apiFetch<{
     statusCode: number;
@@ -96,18 +79,18 @@ export const deleteComment = async (commentId: string) => {
   });
 };
 
-export const addCommentReply = async(
-  videoId: string ,
-  commentId : string ,
-  content : string
+export const addCommentReply = async (
+  videoId: string,
+  commentId: string,
+  content: string,
 ) => {
   return apiFetch<{
-    statusCode : number ;
-    data: BackendComment ;
-    message : string ;
-    success? : boolean;
-  }>(`/comments/${videoId}/${commentId}/reply` ,{
-    method : "POST" ,
-    body : JSON.stringify({ content }),
+    statusCode: number;
+    data: BackendComment;
+    message: string;
+    success?: boolean;
+  }>(`/comments/${videoId}/${commentId}/reply`, {
+    method: "POST",
+    body: JSON.stringify({ content }),
   });
 };

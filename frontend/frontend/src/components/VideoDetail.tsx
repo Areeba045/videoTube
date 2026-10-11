@@ -68,7 +68,6 @@ function parseDuration(duration: string): number {
 
 const SPEEDS = ["0.5x", "1x", "1.5x", "2x"];
 
-
 function formatTimeAgo(dateString: string) {
   const date = new Date(dateString);
   const now = new Date();
@@ -93,13 +92,6 @@ function formatTimeAgo(dateString: string) {
   return date.toLocaleDateString();
 }
 
-// interface CommentReplyItemProps {
-//   reply: Comment;
-//   getUserById: (id: string) => User | undefined;
-//   onAddReply: (commentId: string, text: string) => void;
-//   onLikeComment: (commentId: string, type: "like" | "dislike") => void;
-// }
-
 interface CommentReplyItemProps {
   reply: Comment;
   currentUser: User | null;
@@ -109,188 +101,6 @@ interface CommentReplyItemProps {
   onEditComment?: (commentId: string, text: string) => void;
   onDeleteComment?: (commentId: string) => void;
 }
-
-// function CommentReplyItem({
-//   reply,
-//   getUserById,
-//   onAddReply,
-//   onLikeComment,
-// }: CommentReplyItemProps) {
-//   const [showReplyInput, setShowReplyInput] = useState(false);
-//   const [replyText, setReplyText] = useState("");
-
-//   const replyUser = reply.user || getUserById(reply.userId);
-
-//   function submitReply() {
-//     if (!replyText.trim()) return;
-
-//     // Reply ke apne ID ko parent ID ke taur par bhejo.
-//     onAddReply(reply.id, replyText.trim());
-
-//     setReplyText("");
-//     setShowReplyInput(false);
-//   }
-
-//   if (!replyUser) return null;
-
-//   return (
-//     <div className="flex gap-3">
-//       <img
-//         src={replyUser.avatar || "/default-avatar.png"}
-//         alt={replyUser.name || "User"}
-//         className="w-8 h-8 rounded-full shrink-0"
-//       />
-
-//       <div className="flex-1 min-w-0">
-//         <div className="flex items-center gap-2 mb-0.5">
-//           <span className="font-semibold text-xs text-primary-custom">
-//             {replyUser.name}
-//           </span>
-
-//           <span className="text-xs text-secondary-custom">
-//             {/* {reply.createdAt} */}
-//             {formatTimeAgo(reply.createdAt)}
-//           </span>
-//         </div>
-
-//         <p className="text-sm leading-relaxed text-primary-custom">
-//           {reply.text}
-//         </p>
-
-//         <div className="flex items-center gap-3 mt-1">
-//           {/* <button
-//             onClick={() => onLikeComment(reply.id, "like")}
-//             // className="flex items-center gap-1 text-xs text-secondary-custom hover:text-primary transition-colors"
-//             className={`flex items-center gap-1 text-xs transition-colors ${
-//               reply.userReaction === "like"
-//                 ? "text-red-500"
-//                 : "text-secondary-custom hover:text-primary"
-//             }`}
-//           > */}
-//             {/* <ThumbsUp className="w-3 h-3" /> */}
-//             {/* <ThumbsUp
-//               className={`w-3 h-3 ${
-//                 reply.userReaction === "like" ? "fill-current" : ""
-//               }`}
-//             />
-//             {formatViews(reply.likes)}
-//           </button> */}
-          
-// <button
-//   onClick={() => onLikeComment(reply.id, "like")}
-//   className={`flex items-center gap-1 text-xs transition-colors ${
-//     reply.userReaction === "like"
-//       ? "text-red-500"
-//       : "text-secondary-custom hover:text-primary"
-//   }`}
-//   aria-label="Like reply"
-// >
-//   <ThumbsUp
-//     className={`w-3 h-3 ${
-//       reply.userReaction === "like" ? "fill-current" : ""
-//     }`}
-//   />
-//   {formatViews(reply.likes)}
-// </button>
-
-// <button
-//   onClick={() => onLikeComment(reply.id, "dislike")}
-//   className={`flex items-center gap-1 text-xs transition-colors ${
-//     reply.userReaction === "dislike"
-//       ? "text-red-500"
-//       : "text-secondary-custom hover:text-primary"
-//   }`}
-//   aria-label="Dislike reply"
-// >
-//   <ThumbsDown
-//     className={`w-3 h-3 ${
-//       reply.userReaction === "dislike" ? "fill-current" : ""
-//     }`}
-//   />
-//   {formatViews(reply.dislikes)}
-// </button>
-
-//           {/* <button
-//             onClick={() => onLikeComment(reply.id, "dislike")}
-//             // className="flex items-center gap-1 text-xs text-secondary-custom hover:text-primary transition-colors"
-//             // aria-label="Dislike reply"
-//             className={`flex items-center gap-1 text-xs transition-colors ${
-//               reply.userReaction === "dislike"
-//                 ? "text-red-500"
-//                 : "text-secondary-custom hover:text-primary"
-//             }`}
-//           > */}
-//             {/* <ThumbsDown className="w-3 h-3" /> */}
-// {/* 
-//             <ThumbsDown
-//               className={`w-3 h-3 ${
-//                 reply.userReaction === "dislike" ? "fill-current" : ""
-//               }`}
-//             />
-//           </button> */}
-//           <button
-//             onClick={() => setShowReplyInput((previous) => !previous)}
-//             className="text-xs font-medium text-secondary-custom hover:text-primary transition-colors"
-//           >
-//             Reply
-//           </button>
-//         </div>
-
-//         {showReplyInput && (
-//           <div className="mt-3">
-//             <input
-//               type="text"
-//               value={replyText}
-//               onChange={(e) => setReplyText(e.target.value)}
-//               onKeyDown={(e) => {
-//                 if (e.key === "Enter") submitReply();
-//               }}
-//               placeholder={`Reply to ${replyUser.name}...`}
-//               className="w-full bg-transparent border-b border-base pb-1.5 text-sm outline-none focus:border-primary text-primary-custom placeholder:text-secondary-custom"
-//               autoFocus
-//             />
-
-//             <div className="flex justify-end gap-2 mt-2">
-//               <button
-//                 onClick={() => {
-//                   setShowReplyInput(false);
-//                   setReplyText("");
-//                 }}
-//                 className="px-3 py-1 rounded-full text-xs hover:bg-elevated text-primary-custom"
-//               >
-//                 Cancel
-//               </button>
-
-//               <button
-//                 onClick={submitReply}
-//                 disabled={!replyText.trim()}
-//                 className="px-3 py-1 rounded-full text-xs font-semibold bg-primary text-white disabled:opacity-50"
-//               >
-//                 Reply
-//               </button>
-//             </div>
-//           </div>
-//         )}
-
-//         {/* Render this reply's own replies recursively */}
-//         {reply.replies && reply.replies.length > 0 && (
-//           <div className="mt-3 space-y-3 pl-2 border-l border-base">
-//             {reply.replies.map((childReply) => (
-//               <CommentReplyItem
-//                 key={childReply.id}
-//                 reply={childReply}
-//                 getUserById={getUserById}
-//                 onAddReply={onAddReply}
-//                 onLikeComment={onLikeComment}
-//               />
-//             ))}
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
-
 function CommentReplyItem({
   reply,
   currentUser,
@@ -1163,9 +973,6 @@ export default function VideoDetail({
             {/* Comments list */}
             <div className="space-y-5">
               {comments.map((comment) => {
-                // const commentUser = getUserById(comment.userId);
-                // if (!commentUser) return null;
-
                 const commentUser = comment.user || getUserById(comment.userId);
 
                 if (!commentUser) return null;
@@ -1175,7 +982,6 @@ export default function VideoDetail({
 
                 const commentUserAvatar =
                   commentUser.avatar || "/default-avatar.png";
-                // const isOwnComment = comment.userId === currentUser.id;
                 const isOwnComment = currentUser
                   ? comment.userId === currentUser.id
                   : false;
@@ -1192,8 +998,6 @@ export default function VideoDetail({
                           {commentUser.name}
                         </span>
                         <span className="text-xs text-secondary-custom">
-                          {/* {comment.createdAt} */}
-                          {/* {new Date(comment.createdAt).toLocaleDateString()} */}
                           {formatTimeAgo(comment.createdAt)}
                         </span>
                       </div>
@@ -1235,14 +1039,12 @@ export default function VideoDetail({
                       <div className="flex items-center gap-4 mt-2">
                         <button
                           onClick={() => onLikeComment(comment.id, "like")}
-                          // className="flex items-center gap-1.5 text-xs text-secondary-custom hover:text-primary transition-colors"
                           className={`flex items-center gap-1.5 text-xs transition-colors ${
                             comment.userReaction === "like"
                               ? "text-red-500"
                               : "text-secondary-custom hover:text-primary"
                           }`}
                         >
-                          {/* <ThumbsUp className="w-3.5 h-3.5" /> */}
                           <ThumbsUp
                             className={`w-3.5 h-3.5 ${
                               comment.userReaction === "like"
@@ -1250,23 +1052,17 @@ export default function VideoDetail({
                                 : ""
                             }`}
                           />
-                          {/* {formatViews(comment.likes)} */}
                           {formatViews(comment.likes)}
                         </button>
-                        {/* <button className="flex items-center gap-1.5 text-xs text-secondary-custom hover:text-primary transition-colors">
-                          <ThumbsDown className="w-3.5 h-3.5" />
-                        </button> */}
                         <button
                           onClick={() => onLikeComment(comment.id, "dislike")}
                           aria-label="Dislike comment"
-                          // className="flex items-center gap-1.5 text-xs text-secondary-custom hover:text-primary transition-colors"
                           className={`flex items-center gap-1.5 text-xs transition-colors ${
                             comment.userReaction === "dislike"
                               ? "text-red-500"
                               : "text-secondary-custom hover:text-primary"
                           }`}
                         >
-                          {/* <ThumbsDown className="w-3.5 h-3.5" /> */}
                           <ThumbsDown
                             className={`w-3.5 h-3.5 ${
                               comment.userReaction === "dislike"
@@ -1288,52 +1084,6 @@ export default function VideoDetail({
                           Reply
                         </button>
                       </div>
-
-                      {/* Replies */}
-                      {/* {comment.replies.length > 0 && (
-                        <div className="mt-3 space-y-3 pl-2">
-                          {comment.replies.map((reply) => {
-                            // const replyUser = getUserById(reply.userId);
-                            // if (!replyUser) return null;
-                            const replyUser =
-                              reply.user || getUserById(reply.userId);
-
-                            if (!replyUser) return null;
-                            return (
-                              <div key={reply.id} className="flex gap-3">
-                                <img
-                                  src={replyUser.avatar}
-                                  alt={replyUser.name}
-                                  className="w-8 h-8 rounded-full shrink-0"
-                                />
-                                <div>
-                                  <div className="flex items-center gap-2 mb-0.5">
-                                    <span className="font-semibold text-xs text-primary-custom">
-                                      {replyUser.name}
-                                    </span>
-                                    <span className="text-xs text-secondary-custom">
-                                      {reply.createdAt}
-                                    </span>
-                                  </div>
-                                  <p className="text-sm leading-relaxed text-primary-custom">
-                                    {reply.text}
-                                  </p>
-                                  <div className="flex items-center gap-3 mt-1">
-                                    <button className="flex items-center gap-1 text-xs text-secondary-custom hover:text-primary transition-colors">
-                                      <ThumbsUp className="w-3 h-3" />
-                                      {formatViews(reply.likes)}
-                                    </button>
-                                    <button className="text-xs font-medium text-secondary-custom hover:text-primary transition-colors">
-                                      Reply
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )} */}
-
                       {/* Replies */}
                       {comment.replies?.length > 0 && (
                         <div className="mt-3 space-y-3 pl-2 border-l border-base">
@@ -1345,8 +1095,8 @@ export default function VideoDetail({
                               getUserById={getUserById}
                               onAddReply={onAddReply}
                               onLikeComment={onLikeComment}
-                                  onEditComment={onEditComment}
-    onDeleteComment={onDeleteComment}
+                              onEditComment={onEditComment}
+                              onDeleteComment={onDeleteComment}
                             />
                           ))}
                         </div>
@@ -1457,13 +1207,6 @@ export default function VideoDetail({
             {relatedVideos.map((rv) => {
               const rvChannelName =
                 rv.owner?.fullName || rv.owner?.username || "Unknown channel";
-
-              // return (
-              {
-                /* {relatedVideos.map((rv) => {
-              const rvChannel = getUserById(rv.channelId);
-              if (!rvChannel) return null; */
-              }
               return (
                 <div
                   key={rv.id}

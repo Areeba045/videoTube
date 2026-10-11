@@ -1,555 +1,3 @@
-// import { useEffect, useState } from "react";
-// import { getWatchHistory } from "@/services/userApi";
-// import { normalizeVideo } from "@/services/videoApi";
-// import type { Playlist, User, Video } from "@/types";
-// import VideoFeedPage from "@/pages/VideoFeedPage";
-// import { feedIcons } from "@/pages/feedIcons";
-
-// interface HistoryPageProps {
-//   user: User | null;
-//   playlists: Playlist[];
-//   getUserById: (id: string) => User | undefined;
-//   onSaveToPlaylist: (playlistId: string, videoId: string) => void;
-//   onRemoveFromPlaylist: (playlistId: string, videoId: string) => void;
-//   onCreatePlaylist: (name: string, description: string) => void;
-// }
-
-// export default function HistoryPage({
-//   user,
-//   playlists,
-//   getUserById,
-//   onSaveToPlaylist,
-//   onRemoveFromPlaylist,
-//   onCreatePlaylist,
-// }: HistoryPageProps) {
-//   const [videos, setVideos] = useState<Video[]>([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-
-//   useEffect(() => {
-//     if (!user) {
-//       setVideos([]);
-//       setLoading(false);
-//       return;
-//     }
-
-//     let cancelled = false;
-//     setLoading(true);
-//     setError("");
-//     getWatchHistory()
-//       .then((response) => {
-//         if (!cancelled)
-//           setVideos(response.data.map((video) => normalizeVideo(video)));
-//       })
-//       .catch((requestError) => {
-//         if (!cancelled)
-//           setError(
-//             requestError instanceof Error
-//               ? requestError.message
-//               : "Failed to load watch history",
-//           );
-//       })
-//       .finally(() => {
-//         if (!cancelled) setLoading(false);
-//       });
-//     return () => {
-//       cancelled = true;
-//     };
-//   }, [user]);
-
-//   if (!user)
-//     return (
-//       <div className="py-24 text-center text-sm text-secondary-custom">
-//         Sign in to view your watch history.
-//       </div>
-//     );
-//   if (loading)
-//     return (
-//       <div className="py-24 text-center text-sm text-secondary-custom">
-//         Loading history...
-//       </div>
-//     );
-//   if (error)
-//     return <div className="py-24 text-center text-sm text-error">{error}</div>;
-
-//   return (
-//     <VideoFeedPage
-//       title="History"
-//       subtitle="Your recently watched videos"
-//       icon={feedIcons.history}
-//       videos={videos}
-//       allVideoCount={videos.length}
-//       getUserById={getUserById}
-//       playlists={playlists}
-//       emptyMessage="Videos you watch will appear here."
-//       onSaveToPlaylist={onSaveToPlaylist}
-//       onRemoveFromPlaylist={onRemoveFromPlaylist}
-//       onCreatePlaylist={onCreatePlaylist}
-//     />
-//   );
-// }
-
-// import { useEffect, useState } from "react";
-// import { getWatchHistory } from "@/services/userApi";
-// import { normalizeVideo } from "@/services/videoApi";
-// import type { Playlist, User, Video } from "@/types";
-// import { feedIcons } from "@/pages/feedIcons";
-// import { useNavigate } from "react-router-dom";
-
-// interface HistoryPageProps {
-//   user: User | null;
-//   playlists: Playlist[];
-//   getUserById: (id: string) => User | undefined;
-//   onSaveToPlaylist: (playlistId: string, videoId: string) => void;
-//   onRemoveFromPlaylist: (playlistId: string, videoId: string) => void;
-//   onCreatePlaylist: (name: string, description: string) => void;
-// }
-
-// export default function HistoryPage({
-//   user,
-//   playlists,
-//   getUserById,
-//   onSaveToPlaylist,
-//   onRemoveFromPlaylist,
-//   onCreatePlaylist,
-// }: HistoryPageProps) {
-//   const [videos, setVideos] = useState<Video[]>([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     if (!user) {
-//       setVideos([]);
-//       setLoading(false);
-//       return;
-//     }
-
-//     let cancelled = false;
-
-//     setLoading(true);
-//     setError("");
-
-//     getWatchHistory()
-//       .then((response) => {
-//         if (!cancelled) {
-//           setVideos(
-//             response.data.map((video) =>
-//               normalizeVideo(video)
-//             )
-//           );
-//         }
-//       })
-//       .catch((requestError) => {
-//         if (!cancelled) {
-//           setError(
-//             requestError instanceof Error
-//               ? requestError.message
-//               : "Failed to load watch history"
-//           );
-//         }
-//       })
-//       .finally(() => {
-//         if (!cancelled) {
-//           setLoading(false);
-//         }
-//       });
-
-//     return () => {
-//       cancelled = true;
-//     };
-//   }, [user]);
-
-//   // --------------------------------
-//   // Get date key
-//   // --------------------------------
-
-//   const getDateKey = (dateString?: string) => {
-//     if (!dateString) return "unknown";
-
-//     const date = new Date(dateString);
-
-//     if (Number.isNaN(date.getTime())) {
-//       return "unknown";
-//     }
-
-//     return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-//   };
-
-//   // --------------------------------
-//   // Get section title
-//   // Today / Yesterday / actual date
-//   // --------------------------------
-
-//   const getDayLabel = (dateString?: string) => {
-//     if (!dateString) {
-//       return "Watch history";
-//     }
-
-//     const date = new Date(dateString);
-
-//     if (Number.isNaN(date.getTime())) {
-//       return "Watch history";
-//     }
-
-//     const today = new Date();
-
-//     const yesterday = new Date();
-//     yesterday.setDate(today.getDate() - 1);
-
-//     const dateKey = getDateKey(dateString);
-
-//     if (dateKey === getDateKey(today.toISOString())) {
-//       return "Today";
-//     }
-
-//     if (
-//       dateKey ===
-//       getDateKey(yesterday.toISOString())
-//     ) {
-//       return "Yesterday";
-//     }
-
-//     return date.toLocaleDateString(undefined, {
-//       month: "long",
-//       day: "numeric",
-//       year: "numeric",
-//     });
-//   };
-
-//   // --------------------------------
-//   // Watched time
-//   // --------------------------------
-
-//   const getWatchedText = (dateString?: string) => {
-//     if (!dateString) return "";
-
-//     const watchedDate = new Date(dateString);
-
-//     if (Number.isNaN(watchedDate.getTime())) {
-//       return "";
-//     }
-
-//     const now = new Date();
-
-//     const difference =
-//       now.getTime() - watchedDate.getTime();
-
-//     const seconds = Math.floor(difference / 1000);
-//     const minutes = Math.floor(seconds / 60);
-//     const hours = Math.floor(minutes / 60);
-//     const days = Math.floor(hours / 24);
-
-//     if (seconds < 60) {
-//       return "just now";
-//     }
-
-//     if (minutes < 60) {
-//       return `${minutes} ${
-//         minutes === 1 ? "minute" : "minutes"
-//       } ago`;
-//     }
-
-//     if (hours < 24) {
-//       return `${hours} ${
-//         hours === 1 ? "hour" : "hours"
-//       } ago`;
-//     }
-
-//     if (days === 1) {
-//       return "yesterday";
-//     }
-
-//     return `${days} ${
-//       days === 1 ? "day" : "days"
-//     } ago`;
-//   };
-
-//   // --------------------------------
-//   // Group videos by watched date
-//   // --------------------------------
-
-//   const groupedVideos = videos.reduce(
-//     (groups, video) => {
-//       const key = getDateKey(video.watchedAt);
-
-//       if (!groups[key]) {
-//         groups[key] = [];
-//       }
-
-//       groups[key].push(video);
-
-//       return groups;
-//     },
-//     {} as Record<string, Video[]>
-//   );
-
-//   // --------------------------------
-//   // Sort newest history first
-//   // --------------------------------
-
-//   const sortedGroups = Object.entries(
-//     groupedVideos
-//   ).sort(([keyA, videosA], [keyB, videosB]) => {
-//     if (keyA === "unknown") return 1;
-//     if (keyB === "unknown") return -1;
-
-//     const dateA = videosA[0]?.watchedAt
-//       ? new Date(
-//           videosA[0].watchedAt
-//         ).getTime()
-//       : 0;
-
-//     const dateB = videosB[0]?.watchedAt
-//       ? new Date(
-//           videosB[0].watchedAt
-//         ).getTime()
-//       : 0;
-
-//     return dateB - dateA;
-//   });
-
-//   // --------------------------------
-//   // UI states
-//   // --------------------------------
-
-//   if (!user) {
-//     return (
-//       <div className="py-24 text-center text-sm text-secondary-custom">
-//         Sign in to view your watch history.
-//       </div>
-//     );
-//   }
-
-//   if (loading) {
-//     return (
-//       <div className="py-24 text-center text-sm text-secondary-custom">
-//         Loading history...
-//       </div>
-//     );
-//   }
-
-//   if (error) {
-//     return (
-//       <div className="py-24 text-center text-error">
-//         {error}
-//       </div>
-//     );
-//   }
-
-//   const HistoryIcon = feedIcons.history;
-
-//   return (
-//     <div className="animate-fade-in max-w-5xl">
-//       {/* =========================
-//           Header
-//       ========================= */}
-
-//       <div className="mb-10 flex items-center gap-3">
-//         <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
-//           <HistoryIcon className="w-5 h-5 text-primary" />
-//         </div>
-
-//         <div>
-//           <h1 className="text-2xl font-bold text-primary-custom">
-//             History
-//           </h1>
-
-//           <p className="text-sm text-secondary-custom mt-0.5">
-//             Videos you’ve watched recently
-//           </p>
-//         </div>
-//       </div>
-
-//       {/* =========================
-//           Empty State
-//       ========================= */}
-
-//       {videos.length === 0 ? (
-//         <div className="flex flex-col items-center justify-center py-24 text-center">
-//           <div className="w-16 h-16 bg-elevated rounded-full flex items-center justify-center mb-4">
-//             <HistoryIcon className="w-8 h-8 text-secondary-custom" />
-//           </div>
-
-//           <h3 className="text-lg font-semibold mb-1 text-primary-custom">
-//             No videos here yet
-//           </h3>
-
-//           <p className="text-sm text-secondary-custom">
-//             Videos you watch will appear here.
-//           </p>
-//         </div>
-//       ) : (
-//         /* =========================
-//            History Sections
-//         ========================= */
-
-//         <div className="space-y-12">
-//           {sortedGroups.map(
-//             ([groupKey, groupVideos]) => (
-//               <section key={groupKey}>
-//                 {/* Section heading */}
-
-//                 <div className="flex items-center gap-3 mb-5">
-//                   <h2 className="text-lg font-semibold text-primary-custom">
-//                     {getDayLabel(
-//                       groupVideos[0]?.watchedAt
-//                     )}
-//                   </h2>
-
-//                   <div className="h-px flex-1 bg-primary/10" />
-//                 </div>
-
-//                 {/* Video rows */}
-
-//                 <div className="space-y-2">
-//                   {groupVideos.map((video) => {
-//                     const channel =
-//                       video.owner ||
-//                       getUserById(video.channelId);
-
-//                     return (
-//                       <div
-//                         key={video.id}
-//                         onClick={() =>
-//                           navigate(
-//                             `/watch/${video.id}`
-//                           )
-//                         }
-//                         className="
-//                           group
-//                           flex
-//                           gap-4
-//                           p-3
-//                           rounded-xl
-//                           cursor-pointer
-//                           transition-all
-//                           duration-200
-//                           hover:bg-elevated
-//                         "
-//                       >
-//                         {/* =====================
-//                             Thumbnail
-//                         ===================== */}
-
-//                         <div
-//                           className="
-//                             relative
-//                             w-60
-//                             sm:w-64
-//                             md:w-72
-//                             aspect-video
-//                             flex-shrink-0
-//                             overflow-hidden
-//                             rounded-xl
-//                             bg-elevated
-//                           "
-//                         >
-//                           <img
-//                             src={video.thumbnail}
-//                             alt={video.title}
-//                             className="
-//                               w-full
-//                               h-full
-//                               object-cover
-//                               transition-transform
-//                               duration-300
-//                               group-hover:scale-[1.03]
-//                             "
-//                           />
-
-//                           {/* Duration */}
-
-//                           {video.duration && (
-//                             <span
-//                               className="
-//                                 absolute
-//                                 bottom-2
-//                                 right-2
-//                                 rounded
-//                                 bg-black/85
-//                                 px-1.5
-//                                 py-0.5
-//                                 text-[11px]
-//                                 font-medium
-//                                 text-white
-//                               "
-//                             >
-//                               {video.duration}
-//                             </span>
-//                           )}
-//                         </div>
-
-//                         {/* =====================
-//                             Video information
-//                         ===================== */}
-
-//                         <div className="min-w-0 flex-1 py-1">
-//                           {/* Title */}
-
-//                           <h3
-//                             className="
-//                               text-base
-//                               sm:text-lg
-//                               font-semibold
-//                               leading-snug
-//                               text-primary-custom
-//                               line-clamp-2
-//                               group-hover:text-primary
-//                               transition-colors
-//                             "
-//                           >
-//                             {video.title}
-//                           </h3>
-
-//                           {/* Channel */}
-
-//                           <p
-//                             className="
-//                               mt-2
-//                               text-sm
-//                               text-secondary-custom
-//                               truncate
-//                             "
-//                           >
-//                             {channel?.fullName ||
-//                               channel?.username ||
-//                               "Unknown channel"}
-//                           </p>
-
-//                           {/* Views • Category • Watched */}
-
-//                           <p
-//                             className="
-//                               mt-1.5
-//                               text-sm
-//                               text-secondary-custom
-//                               line-clamp-1
-//                             "
-//                           >
-//                             {video.views.toLocaleString()} views
-//                             {" • "}
-//                             {video.category}
-//                             {" • "}
-//                             {getWatchedText(
-//                               video.watchedAt
-//                             )}
-//                           </p>
-//                         </div>
-//                       </div>
-//                     );
-//                   })}
-//                 </div>
-//               </section>
-//             )
-//           )}
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
 import { useEffect, useState } from "react";
 import { MoreVertical, Trash2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -709,22 +157,14 @@ export default function HistoryPage({
     getWatchHistory()
       .then((response) => {
         if (cancelled) return;
-
-        /*
-         * Keep watchedAt from the BACKEND response.
-         *
-         * This is important because normalizeVideo mainly
-         * normalizes normal video information.
-         */
         const normalizedVideos = response.data.map((video) => {
           const normalizedVideo = normalizeVideo(video);
 
           return {
             ...normalizedVideo,
 
-            // Explicitly preserve watch-history timestamp
             watchedAt: video.watchedAt || "",
-             historyId: video.historyId || "",
+            historyId: video.historyId || "",
           };
         });
 
@@ -760,8 +200,6 @@ export default function HistoryPage({
       setActiveMenu(null);
 
       await removeFromWatchHistory(historyId);
-
-      // Update the UI only after the backend succeeds.
       setVideos((currentVideos) =>
         currentVideos.filter((video) => video.historyId !== historyId),
       );
@@ -791,8 +229,6 @@ export default function HistoryPage({
       setActiveMenu(null);
 
       await clearWatchHistory();
-
-      // Clear the screen after the backend succeeds.
       setVideos([]);
     } catch (error) {
       setActionError(
@@ -870,12 +306,12 @@ export default function HistoryPage({
   );
 
   Object.values(groupedVideos).forEach((group) => {
-  group.sort(
-    (a, b) =>
-      new Date(b.watchedAt || 0).getTime() -
-      new Date(a.watchedAt || 0).getTime(),
-  );
-});
+    group.sort(
+      (a, b) =>
+        new Date(b.watchedAt || 0).getTime() -
+        new Date(a.watchedAt || 0).getTime(),
+    );
+  });
   /* ---------------- SORT GROUPS ---------------- */
 
   const sortedGroups = Object.entries(groupedVideos).sort(
@@ -903,23 +339,6 @@ export default function HistoryPage({
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      {/* PAGE HEADER */}
-      {/* <div className="mb-10 flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
-          <HistoryIcon className="h-5 w-5 text-primary" />
-        </div>
-
-        <div>
-          <h1 className="text-2xl font-bold text-primary-custom">
-            History
-          </h1>
-
-          <p className="mt-0.5 text-sm text-secondary-custom">
-            Videos you’ve watched recently
-          </p>
-        </div>
-      </div> */}
-
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-elevated">
@@ -983,14 +402,6 @@ export default function HistoryPage({
                   const channel = video.owner || getUserById(video.channelId);
 
                   return (
-                    // <div
-                    //   // key={video.id}
-                    //   key={`${video.id}-${video.watchedAt}-${dateKey}`}
-                    //   onClick={() =>
-                    //     navigate(`/watch/${video.id}`)
-                    //   }
-                    //   className="group flex cursor-pointer gap-4 rounded-xl p-3 transition-all duration-200 hover:bg-elevated"
-                    // >
                     <div
                       key={`${video.historyId}-${video.watchedAt}-${dateKey}`}
                       onClick={() => navigate(`/watch/${video.id}`)}
@@ -1045,7 +456,9 @@ export default function HistoryPage({
                           title="More options"
                           onClick={() =>
                             setActiveMenu((current) =>
-                              current === video.historyId ? null : video.historyId,
+                              current === video.historyId
+                                ? null
+                                : video.historyId,
                             )
                           }
                           className="rounded-full p-2 text-secondary transition hover:bg-elevated hover:text-primary"
@@ -1058,7 +471,9 @@ export default function HistoryPage({
                             <button
                               type="button"
                               disabled={actionLoading === video.historyId}
-                              onClick={() => handleRemoveFromHistory(video.historyId)}
+                              onClick={() =>
+                                handleRemoveFromHistory(video.historyId)
+                              }
                               className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-primary transition hover:bg-elevated disabled:opacity-50"
                             >
                               <Trash2 className="h-4 w-4 text-secondary" />

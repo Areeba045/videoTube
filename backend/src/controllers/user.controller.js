@@ -197,7 +197,7 @@ const logoutUser = asyncHandler(async (req, res) => {
       },
     },
     {
-      returnDocument : "after"
+      returnDocument: "after",
     }
   );
 
@@ -304,7 +304,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         username: username,
       },
     },
-    { returnDocument : "after" } //update hone k bad info return hoti ha
+    { returnDocument: "after" } //update hone k bad info return hoti ha
   ).select("-password");
 
   return res
@@ -331,7 +331,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
       $set: { avatar: avatar.url },
     },
     {
-      returnDocument : "after"
+      returnDocument: "after",
     }
   ).select("-password");
 
@@ -357,148 +357,12 @@ const updateCoverImage = asyncHandler(async (req, res) => {
       $set: { coverImage: coverImage.url },
     },
     {
-      returnDocument : "after"
+      returnDocument: "after",
     }
   ).select("-password");
 
   return (res.status(200).json, user, "coverImage was updated successfully!");
 });
-
-// const getUserChannelProfile = asyncHandler(async (req, res) => {
-//   const { username } = req.params;
-
-//   if (!username?.trim()) {
-//     throw new ApiError(400, "username is missing");
-//   }
-
-//   //    User.find({username})
-//   const channel = await User.aggregate([
-//     {
-//       $match: {
-//         username: username?.toLowerCase(), // find user (filter) one document
-//       },
-//     },
-//     {
-//       $lookup: {
-//         from: "subscriptions",
-//         localField: "_id",
-//         foreignField: "channel",
-//         as: "subscribers",
-//       },
-//     },
-//     {
-//       $lookup: {
-//         from: "subscriptions",
-//         localField: "_id",
-//         foreignField: "subscriber",
-//         as: "subscribedTo", // jin ko me ne subscrib kr rakha ha
-//       },
-//     }, // ye dono fields humare pass alag alag hn ab add krna ha
-
-//     {
-//       $addFields: {
-//         subscribersCount: {
-//           $size: "$subscribers",
-//         },
-
-//         channelSubscribedToCount: {
-//           $size: "$subscribedTo",
-//         },
-
-//         isSubscribed: {
-//           $cond: {
-//             if: {
-//               $in: [req.user?._id, "$subscribers.subscriber"],
-//             },
-//             then: true,
-//             else: false,
-//           },
-//         },
-//       },
-//     },
-
-//     {
-//       $project: {
-//         fullName: 1,
-//         username: 1,
-//          isSubscribed: 1,
-//         subscribersCount: 1,
-//         channelSubscribedToCount: 1,
-//         avatar: 1,
-//         coverImage: 1,
-//         email: 1,
-//       },
-//     },
-//   ]);
-//   console.log(channel);
-
-//   if (!channel?.length) {
-//     throw new ApiError(404, "channel not exists");
-//   }
-
-//   return res
-//     .status(200)
-//     .json(
-//       new ApiResponse(200, channel[0], "User channel fetched successfully ")
-//     );
-// });
-
-// sub pipelines
-
-// const getWatchHistory = asyncHandler(async (req, res) => {
-//   const user = await User.aggregate([
-//     {
-//       $match: {
-//         _id: new mongoose.Types.ObjectId(req.user._id), // string id ko mongodb ki object id me convert karna
-//       },
-//     },
-//     {
-//       $lookup: {
-//         from: "videos",
-//         localField: "watchHistory",
-//         foreignField: "_id",
-//         as: "watchHistory",
-//         pipeline: [
-//           {
-//             $lookup: {
-//               from: "users",
-//               localField: "owner",
-//               foreignField: "_id",
-//               as: "owner",
-//               pipeline: [
-//                 {
-//                   $project: {
-//                     fullName: 1,
-//                     username: 1,
-//                     avatar: 1,
-//                   },
-//                 },
-//               ],
-//             },
-//           },
-//           {
-//             $addFields: {
-//               owner: {
-//                 $first: "$owner",
-//               },
-//             },
-//           },
-//         ],
-//       },
-//     },
-//   ]);
-
-//   return res
-//     .status(200)
-//     .json(
-//       new ApiResponse(
-//         200,
-//         user[0]?.watchHistory,
-//         "WatchHistory fetched successfully"
-//       )
-//     );
-// });
-
 
 const getWatchHistory = asyncHandler(async (req, res) => {
   const user = await User.aggregate([
@@ -549,7 +413,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
           $first: "$owner",
         },
         "video.watchedAt": "$watchHistory.watchedAt",
-            "video.historyId": "$watchHistory._id",
+        "video.historyId": "$watchHistory._id",
       },
     },
 
@@ -560,34 +424,10 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     },
   ]);
 
-  return res.status(200).json(
-    new ApiResponse(
-      200,
-      user,
-      "WatchHistory fetched successfully"
-    )
-  );
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "WatchHistory fetched successfully"));
 });
-
-
-// const removeFromWatchHistory = asyncHandler(async (req, res) => {
-//   const { videoId } = req.params;
-
-//   await User.findByIdAndUpdate(
-//     req.user._id,
-//     {
-//       $pull: {
-//         watchHistory: {
-//           video: new mongoose.Types.ObjectId(videoId),
-//         },
-//       },
-//     },
-//   );
-
-//   return res.status(200).json(
-//     new ApiResponse(200, null, "Video removed from watch history"),
-//   );
-// });
 
 const removeFromWatchHistory = asyncHandler(async (req, res) => {
   const { historyId } = req.params;
@@ -605,30 +445,26 @@ const removeFromWatchHistory = asyncHandler(async (req, res) => {
         },
       },
     },
-    { new: true },
+    { new: true }
   );
 
   if (!user) {
     throw new ApiError(404, "User not found");
   }
 
-  return res.status(200).json(
-    new ApiResponse(200, null, "History entry removed successfully"),
-  );
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "History entry removed successfully"));
 });
 
-
 const clearWatchHistory = asyncHandler(async (req, res) => {
-  await User.findByIdAndUpdate(
-    req.user._id,
-    {
-      $set: { watchHistory: [] },
-    },
-  );
+  await User.findByIdAndUpdate(req.user._id, {
+    $set: { watchHistory: [] },
+  });
 
-  return res.status(200).json(
-    new ApiResponse(200, null, "Watch history cleared successfully"),
-  );
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Watch history cleared successfully"));
 });
 
 const getUserChannelProfile = asyncHandler(async (req, res) => {
@@ -680,10 +516,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         isSubscribed: {
           $cond: {
             if: {
-              $in: [
-                req.user?._id,
-                "$subscribers.subscriber",
-              ],
+              $in: [req.user?._id, "$subscribers.subscriber"],
             },
             then: true,
             else: false,
@@ -710,34 +543,29 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Channel does not exist");
   }
 
-  return res.status(200).json(
-    new ApiResponse(
-      200,
-      channel[0],
-      "User channel fetched successfully"
-    )
-  );
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, channel[0], "User channel fetched successfully")
+    );
 });
 
-const addToWatchHistory = asyncHandler(async (req , res) => {
-  const { videoId } = req.params ;
+const addToWatchHistory = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
 
-  await User.findByIdAndUpdate(
-    req.user._id , 
-    {
-      $push :{
-        watchHistory : {
-          video : videoId ,
-          watchedAt : new Date(),
-        }
-      }
-    }
-  )
+  await User.findByIdAndUpdate(req.user._id, {
+    $push: {
+      watchHistory: {
+        video: videoId,
+        watchedAt: new Date(),
+      },
+    },
+  });
 
-  return res.status(200).json(
-    new ApiResponse(200 , null , "Video added to Watch History ")
-  )
-})
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Video added to Watch History "));
+});
 export {
   registerUser,
   loginUser,
@@ -750,7 +578,7 @@ export {
   getUserChannelProfile,
   getWatchHistory,
   updateCoverImage,
-  addToWatchHistory ,
+  addToWatchHistory,
   removeFromWatchHistory,
   clearWatchHistory,
 };

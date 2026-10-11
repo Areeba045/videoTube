@@ -20,15 +20,15 @@ interface BackendVideo {
   createdAt?: string;
   owner?: BackendOwner;
   likesCount?: number;
-  dislikeCount? : number ;
+  dislikeCount?: number;
   isPublished?: boolean;
   comments?: unknown[];
   commentsCount?: number;
   subscriberCount?: number;
   currentUserReaction?: unknown;
-  watchedAt? : string ;
-  isSubscribed : boolean ;
-  historyId? : string ; 
+  watchedAt?: string;
+  isSubscribed: boolean;
+  historyId?: string;
 }
 
 function formatDuration(duration?: number | string): string {
@@ -58,7 +58,7 @@ export const normalizeVideo = (
 } => {
   return {
     id: video._id || "",
-    historyId: video.historyId || "" ,
+    historyId: video.historyId || "",
     title: video.title || "Untitled video",
     description: video.description || "",
     thumbnail: video.thumbnail || "",
@@ -71,7 +71,7 @@ export const normalizeVideo = (
       ? new Date(video.createdAt).toLocaleDateString()
       : "",
 
-      watchedAt : video.watchedAt || "",
+    watchedAt: video.watchedAt || "",
 
     channelId: video.owner?._id || "",
     category: "Technology",
@@ -83,37 +83,33 @@ export const normalizeVideo = (
     owner: video.owner
       ? {
           _id: video.owner._id || "",
-          username:  video.owner.username || "",
-          fullName: video.owner.fullName|| "",
+          username: video.owner.username || "",
+          fullName: video.owner.fullName || "",
           avatar: video.owner.avatar || "",
         }
       : undefined,
     comments: video.comments || [],
     commentsCount: video.commentsCount || 0,
     subscriberCount: video.subscriberCount || 0,
-    isSubscribed: video.isSubscribed ?? false , 
+    isSubscribed: video.isSubscribed ?? false,
     currentUserReaction: video.currentUserReaction || null,
   };
 };
 
-// GET ALL VIDEOS
 export const getAllVideos = async (page = 1, limit = 10) => {
   return apiFetch<{ data: BackendVideo[] }>(
     `/videos/all?page=${page}&limit=${limit}`,
   );
 };
 
-// GET SINGLE VIDEO
 export const getVideoById = async (videoId: string) => {
   return apiFetch<{ data: BackendVideo }>(`/videos/${videoId}`);
 };
 
-// SEARCH VIDEOS
 export const searchVideos = async (search: string) => {
   return apiFetch(`/videos/c/${encodeURIComponent(search)}`);
 };
 
-// UPLOAD VIDEO
 export const uploadVideo = async (
   title: string,
   description: string,
@@ -139,7 +135,6 @@ export const uploadVideo = async (
   });
 };
 
-// UPDATE VIDEO
 export const updateVideo = async (
   videoId: string,
   data: {
@@ -173,21 +168,18 @@ export const updateVideo = async (
   });
 };
 
-// DELETE VIDEO
 export const deleteVideo = async (videoId: string) => {
   return apiFetch(`/videos/${videoId}`, {
     method: "DELETE",
   });
 };
 
-// TOGGLE PUBLISH
 export const togglePublishStatus = async (videoId: string) => {
   return apiFetch(`/videos/toggle/published/${videoId}`, {
     method: "PATCH",
   });
 };
 
-
-export const getMyVideos = async() => {
+export const getMyVideos = async () => {
   return apiFetch("/videos/my-videos");
-}
+};
