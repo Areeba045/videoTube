@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getCurrentUser, getUserChannelProfile, getWatchHistory, loginUser, logoutUser, registerUser, updateAccountDetails, updateCoverImage, updateUserAvatar , changePassword } from "../controllers/user.controller.js";
+import { clearWatchHistory ,  removeFromWatchHistory ,  addToWatchHistory , getCurrentUser, getUserChannelProfile, getWatchHistory, loginUser, logoutUser, registerUser, updateAccountDetails, updateCoverImage, updateUserAvatar , changePassword } from "../controllers/user.controller.js";
 import { upload } from '../middelware/multter.middelware.js'
 import { verifyJwt } from "../middelware/auth.middelware.js";
 import  { refreshAccessToken } from '../controllers/user.controller.js'
@@ -41,5 +41,18 @@ router.route("/cover-Image").patch(verifyJwt , upload.single("coverImage") , upd
 router.route("/c/:channelId").get(verifyJwt , getUserChannelProfile);
 
 router.route("/history").get(verifyJwt , getWatchHistory);
+
+router.route("/history").delete(verifyJwt, clearWatchHistory);
+
+// router
+//   .route("/history/:videoId")
+//   .delete(verifyJwt, removeFromWatchHistory);
+
+  router.route("/history/entry/:historyId").delete(
+  verifyJwt,
+  removeFromWatchHistory
+);
+router.route("/history/:videoId").post(verifyJwt , addToWatchHistory);
+
 
 export default router;

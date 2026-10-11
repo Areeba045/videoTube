@@ -69,7 +69,7 @@
 
 //   // function handleChannelClick(e: React.MouseEvent) {
 //   //   e.stopPropagation();
-//   //   if (onNavigateChannel) 
+//   //   if (onNavigateChannel)
 //   //     // onNavigateChannel(channel.id);
 //   // }
 
@@ -200,8 +200,6 @@
 //   );
 // }
 
-
-
 import { useState, useRef, useEffect } from "react";
 
 import {
@@ -226,15 +224,9 @@ interface VideoCardProps {
 
   playlists: Playlist[];
 
-  onSaveToPlaylist: (
-    playlistId: string,
-    videoId: string
-  ) => void;
+  onSaveToPlaylist: (playlistId: string, videoId: string) => void;
 
-  onRemoveFromPlaylist?: (
-    playlistId: string,
-    videoId: string
-  ) => void;
+  onRemoveFromPlaylist?: (playlistId: string, videoId: string) => void;
 
   onShare?: (videoId: string) => void;
 
@@ -256,72 +248,51 @@ export default function VideoCard({
   onNavigateChannel,
   activePlaylistId,
 }: VideoCardProps) {
-  const [showMenu, setShowMenu] =
-    useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
-  const [showPlaylistMenu, setShowPlaylistMenu] =
-    useState(false);
+  const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
 
-  const [showRemoveConfirm, setShowRemoveConfirm] =
-    useState(false);
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
 
-  const [showCreatePlaylist, setShowCreatePlaylist] =
-    useState(false);
+  const [showRemovePlaylist, setShowRemovePlaylist] = useState(false);
+  const [selectedRemovePlaylistId, setSelectedRemovePlaylistId] = useState<
+    string | null
+  >(null);
 
-  const [newPlaylistName, setNewPlaylistName] =
-    useState("");
+  const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
 
-  const menuRef =
-    useRef<HTMLDivElement>(null);
+  const [newPlaylistName, setNewPlaylistName] = useState("");
+
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(
-          e.target as Node
-        )
-      ) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setShowMenu(false);
         setShowPlaylistMenu(false);
         setShowCreatePlaylist(false);
       }
     }
 
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside
-    );
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   const activePlaylist = activePlaylistId
-    ? playlists.find(
-        (playlist) =>
-          playlist.id === activePlaylistId
-      )
+    ? playlists.find((playlist) => playlist.id === activePlaylistId)
     : null;
 
   const isInActivePlaylist = activePlaylist
     ? activePlaylist.videoIds.includes(video.id)
     : false;
 
-  const playlistContainsVideo = (
-    playlistId: string
-  ) => {
-    const playlist = playlists.find(
-      (item) => item.id === playlistId
-    );
+  const playlistContainsVideo = (playlistId: string) => {
+    const playlist = playlists.find((item) => item.id === playlistId);
 
-    return playlist
-      ? playlist.videoIds.includes(video.id)
-      : false;
+    return playlist ? playlist.videoIds.includes(video.id) : false;
   };
 
   function handleShare() {
@@ -333,36 +304,24 @@ export default function VideoCard({
   }
 
   function handleCreatePlaylist() {
-    if (
-      newPlaylistName.trim() &&
-      onCreatePlaylist
-    ) {
-      onCreatePlaylist(
-        newPlaylistName.trim()
-      );
+    if (newPlaylistName.trim() && onCreatePlaylist) {
+      onCreatePlaylist(newPlaylistName.trim());
 
       setNewPlaylistName("");
       setShowCreatePlaylist(false);
     }
   }
 
-  function handleChannelClick(
-    e: React.MouseEvent
-  ) {
+  function handleChannelClick(e: React.MouseEvent) {
     e.stopPropagation();
 
-    if (
-      onNavigateChannel &&
-      video.channelId
-    ) {
-      onNavigateChannel(video.channelId);
+    if (onNavigateChannel && video.channelId) {
+      onNavigateChannel(video.owner?._id);
     }
   }
 
   const channelName =
-    video.owner?.fullName ||
-    video.owner?.username ||
-    "Unknown creator";
+    video.owner?.fullName || video.owner?.username || "Unknown creator";
 
   return (
     <div
@@ -389,10 +348,7 @@ export default function VideoCard({
       <div className="flex gap-3 mt-3 px-1">
         {/* Avatar */}
         <img
-          src={
-            video.owner?.avatar ||
-            "/default-avatar.png"
-          }
+          src={video.owner?.avatar || "/default-avatar.png"}
           alt={channelName}
           onClick={handleChannelClick}
           className="w-9 h-9 rounded-full shrink-0 mt-0.5 cursor-pointer hover:ring-2 hover:ring-primary transition-all object-cover"
@@ -418,9 +374,7 @@ export default function VideoCard({
 
           {/* Views + date */}
           <div className="flex items-center gap-1 text-xs text-secondary-custom">
-            <span>
-              {formatViews(video.views)} views
-            </span>
+            <span>{formatViews(video.views)} views</span>
 
             <span>•</span>
 
@@ -429,10 +383,7 @@ export default function VideoCard({
         </div>
 
         {/* Menu */}
-        <div
-          className="relative"
-          ref={menuRef}
-        >
+        <div className="relative" ref={menuRef}>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -446,17 +397,13 @@ export default function VideoCard({
           {showMenu && (
             <div
               className="absolute right-0 top-8 w-56 bg-card rounded-xl shadow-xl border border-base overflow-hidden z-10 animate-scale-in"
-              onClick={(e) =>
-                e.stopPropagation()
-              }
+              onClick={(e) => e.stopPropagation()}
             >
               {/* Save to playlist */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setShowPlaylistMenu(
-                    !showPlaylistMenu
-                  );
+                  setShowPlaylistMenu(!showPlaylistMenu);
                 }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-elevated transition-colors text-primary-custom"
               >
@@ -467,48 +414,35 @@ export default function VideoCard({
               {showPlaylistMenu && (
                 <div className="border-t border-base py-1 max-h-56 overflow-y-auto scrollbar-thin">
                   {/* Create playlist */}
-                  {onCreatePlaylist &&
-                    !showCreatePlaylist && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowCreatePlaylist(
-                            true
-                          );
-                        }}
-                        className="w-full flex items-center gap-3 px-8 py-2 text-xs hover:bg-elevated transition-colors text-primary font-medium"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
+                  {onCreatePlaylist && !showCreatePlaylist && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowCreatePlaylist(true);
+                      }}
+                      className="w-full flex items-center gap-3 px-8 py-2 text-xs hover:bg-elevated transition-colors text-primary font-medium"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
 
-                        <span className="flex-1 text-left">
-                          Create new playlist
-                        </span>
-                      </button>
-                    )}
+                      <span className="flex-1 text-left">
+                        Create new playlist
+                      </span>
+                    </button>
+                  )}
 
                   {/* Create playlist form */}
                   {showCreatePlaylist && (
                     <div
                       className="px-4 py-2 bg-elevated animate-slide-up"
-                      onClick={(e) =>
-                        e.stopPropagation()
-                      }
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center gap-2">
                         <input
                           type="text"
-                          value={
-                            newPlaylistName
-                          }
-                          onChange={(e) =>
-                            setNewPlaylistName(
-                              e.target.value
-                            )
-                          }
+                          value={newPlaylistName}
+                          onChange={(e) => setNewPlaylistName(e.target.value)}
                           onKeyDown={(e) => {
-                            if (
-                              e.key === "Enter"
-                            ) {
+                            if (e.key === "Enter") {
                               e.stopPropagation();
                               handleCreatePlaylist();
                             }
@@ -519,9 +453,7 @@ export default function VideoCard({
                         />
 
                         <button
-                          onClick={
-                            handleCreatePlaylist
-                          }
+                          onClick={handleCreatePlaylist}
                           className="p-1.5 rounded-lg bg-primary text-white hover:bg-primary-700 transition-colors"
                         >
                           <Check className="w-3 h-3" />
@@ -529,9 +461,7 @@ export default function VideoCard({
 
                         <button
                           onClick={() => {
-                            setShowCreatePlaylist(
-                              false
-                            );
+                            setShowCreatePlaylist(false);
                             setNewPlaylistName("");
                           }}
                           className="p-1.5 rounded-lg hover:bg-hover transition-colors"
@@ -543,7 +473,7 @@ export default function VideoCard({
                   )}
 
                   {/* Existing playlists */}
-                  {playlists.map((playlist) => {
+                  {/* {playlists.map((playlist) => {
                     const alreadySaved =
                       playlistContainsVideo(
                         playlist.id
@@ -582,21 +512,206 @@ export default function VideoCard({
                         )}
                       </button>
                     );
-                  })}
+                  })} */}
+
+                  {/* Existing playlists */}
+                  {/* {playlists.map((playlist) => {
+                    const alreadySaved = playlistContainsVideo(playlist.id);
+
+                    return (
+                      <button
+                        key={playlist.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+
+                          if (alreadySaved) {
+                            if (onRemoveFromPlaylist) {
+                              onRemoveFromPlaylist(playlist.id, video.id);
+                            }
+                          } else {
+                            onSaveToPlaylist(playlist.id, video.id);
+                          }
+
+                          setShowMenu(false);
+                          setShowPlaylistMenu(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-8 py-2 text-xs transition-colors text-primary-custom hover:bg-elevated"
+                      >
+                        {alreadySaved ? (
+                          <Trash2 className="w-3.5 h-3.5 text-error" />
+                        ) : (
+                          <Bookmark className="w-3.5 h-3.5" />
+                        )}
+
+                        <span className="flex-1 text-left">
+                          {alreadySaved
+                            ? // ? `Remove from ${playlist.name}`
+                              // : `Save to ${playlist.name}`}
+                              `Remove from ${playlist.name}`
+                            : `${playlist.name}`}
+                        </span>
+
+                        {alreadySaved && (
+                          <Check className="w-3 h-3 text-success" />
+                        )}
+                      </button>
+                    );
+                  })} */}
+
+
+
+                  {/* Existing playlists */}
+{playlists.map((playlist) => {
+  const alreadySaved =
+    playlist.videoIds.includes(video.id);
+
+  return (
+    <button
+      key={playlist.id}
+      onClick={(e) => {
+        e.stopPropagation();
+
+        if (!alreadySaved) {
+          onSaveToPlaylist(
+            playlist.id,
+            video.id
+          );
+        }
+
+        setShowMenu(false);
+        setShowPlaylistMenu(false);
+      }}
+      className="w-full flex items-center gap-3 px-8 py-2 text-xs hover:bg-elevated transition-colors text-primary-custom"
+    >
+      <Bookmark className="w-3.5 h-3.5" />
+
+      <span className="flex-1 text-left">
+        {playlist.name}
+      </span>
+
+      {alreadySaved && (
+        <Check className="w-3 h-3 text-success" />
+      )}
+    </button>
+  );
+})}
+
+{/* Remove from Playlist */}
+{playlists.some((playlist) =>
+  playlist.videoIds.includes(video.id)
+) && (
+  <>
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        setShowRemovePlaylist(true);
+        setSelectedRemovePlaylistId(null);
+      }}
+      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-error/10 hover:text-error transition-colors text-primary-custom"
+    >
+      <Trash2 className="w-4 h-4" />
+
+      <span>
+        Remove from Playlist
+      </span>
+    </button>
+
+    {showRemovePlaylist && (
+      <div
+        className="border-t border-base p-3 bg-elevated"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p className="text-xs text-secondary-custom mb-3">
+          Select playlist to remove this video from:
+        </p>
+
+        <div className="space-y-2">
+          {playlists
+            .filter((playlist) =>
+              playlist.videoIds.includes(video.id)
+            )
+            .map((playlist) => (
+              <button
+                key={playlist.id}
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  setSelectedRemovePlaylistId(
+                    playlist.id
+                  );
+                }}
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-left transition-colors ${
+                  selectedRemovePlaylistId ===
+                  playlist.id
+                    ? "bg-error/10 text-error"
+                    : "hover:bg-hover text-primary-custom"
+                }`}
+              >
+                <span className="flex-1">
+                  {playlist.name}
+                </span>
+
+                {selectedRemovePlaylistId ===
+                  playlist.id && (
+                    <Check className="w-3.5 h-3.5" />
+                  )}
+              </button>
+            ))}
+        </div>
+
+        <div className="flex gap-2 mt-3">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+
+              setShowRemovePlaylist(false);
+              setSelectedRemovePlaylistId(null);
+            }}
+            className="flex-1 px-3 py-1.5 rounded-lg bg-card border border-base text-primary-custom text-xs font-medium hover:bg-hover transition-colors"
+          >
+            Cancel
+          </button>
+
+          <button
+            disabled={!selectedRemovePlaylistId}
+            onClick={(e) => {
+              e.stopPropagation();
+
+              if (
+                selectedRemovePlaylistId &&
+                onRemoveFromPlaylist
+              ) {
+                onRemoveFromPlaylist(
+                  selectedRemovePlaylistId,
+                  video.id
+                );
+              }
+
+              setShowRemovePlaylist(false);
+              setSelectedRemovePlaylistId(null);
+              setShowMenu(false);
+            }}
+            className="flex-1 px-3 py-1.5 rounded-lg bg-error text-white text-xs font-semibold hover:bg-error/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+    )}
+  </>
+)}
                 </div>
               )}
 
               {/* Remove from playlist */}
-              {isInActivePlaylist &&
+              {/* {isInActivePlaylist &&
                 onRemoveFromPlaylist &&
                 activePlaylistId && (
                   <>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        setShowRemoveConfirm(
-                          true
-                        );
+                        setShowRemoveConfirm(true);
                       }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-error/10 hover:text-error transition-colors text-primary-custom"
                     >
@@ -607,16 +722,10 @@ export default function VideoCard({
                     {showRemoveConfirm && (
                       <div
                         className="border-t border-base p-3 bg-elevated animate-slide-up"
-                        onClick={(e) =>
-                          e.stopPropagation()
-                        }
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <p className="text-xs text-secondary-custom mb-2">
-                          Remove "
-                          {video.title.slice(
-                            0,
-                            30
-                          )}
+                          Remove "{video.title.slice(0, 30)}
                           ..." from this playlist?
                         </p>
 
@@ -625,15 +734,10 @@ export default function VideoCard({
                             onClick={(e) => {
                               e.stopPropagation();
 
-                              onRemoveFromPlaylist(
-                                activePlaylistId,
-                                video.id
-                              );
+                              onRemoveFromPlaylist(activePlaylistId, video.id);
 
                               setShowMenu(false);
-                              setShowRemoveConfirm(
-                                false
-                              );
+                              setShowRemoveConfirm(false);
                             }}
                             className="flex-1 px-3 py-1.5 rounded-lg bg-error text-white text-xs font-semibold hover:bg-error/80 transition-colors"
                           >
@@ -643,9 +747,7 @@ export default function VideoCard({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setShowRemoveConfirm(
-                                false
-                              );
+                              setShowRemoveConfirm(false);
                             }}
                             className="px-3 py-1.5 rounded-lg bg-card border border-base text-primary-custom text-xs font-medium hover:bg-hover transition-colors"
                           >
@@ -655,7 +757,7 @@ export default function VideoCard({
                       </div>
                     )}
                   </>
-                )}
+                )} */}
 
               {/* Share */}
               <button

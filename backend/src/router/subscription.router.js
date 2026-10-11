@@ -9,11 +9,11 @@ import {
 
 const router = Router();
 
-router.use(verifyJwt) ;
+// router.use(verifyJwt) ;
 
-router.route("/c/:channelId").get(getUserChannelSubscribers).post(toggleSubscription);
+router.route("/c/:channelId").get(getUserChannelSubscribers).post(verifyJwt , toggleSubscription);
 
-router.route("/subscribed").get(getSubscribedChannels)
+router.route("/subscribed").get(verifyJwt , getSubscribedChannels)
 
 
 

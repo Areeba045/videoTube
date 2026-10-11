@@ -129,7 +129,7 @@ interface HomePageProps {
     videoId: string
   ) => void;
 
-  onCreatePlaylist: (name: string) => void;
+  onCreatePlaylist: (name: string , description : string) => void;
 }
 
 export default function HomePage({

@@ -20,11 +20,15 @@ interface BackendVideo {
   createdAt?: string;
   owner?: BackendOwner;
   likesCount?: number;
+  dislikeCount? : number ;
   isPublished?: boolean;
   comments?: unknown[];
   commentsCount?: number;
   subscriberCount?: number;
   currentUserReaction?: unknown;
+  watchedAt? : string ;
+  isSubscribed : boolean ;
+  historyId? : string ; 
 }
 
 function formatDuration(duration?: number | string): string {
@@ -54,6 +58,7 @@ export const normalizeVideo = (
 } => {
   return {
     id: video._id || "",
+    historyId: video.historyId || "" ,
     title: video.title || "Untitled video",
     description: video.description || "",
     thumbnail: video.thumbnail || "",
@@ -66,10 +71,12 @@ export const normalizeVideo = (
       ? new Date(video.createdAt).toLocaleDateString()
       : "",
 
+      watchedAt : video.watchedAt || "",
+
     channelId: video.owner?._id || "",
     category: "Technology",
     likes: video.likesCount || 0,
-    dislikes: 0,
+    dislikes: video.dislikeCount || 0,
     tags: [],
     privacy: video.isPublished ? "public" : "private",
 
@@ -84,6 +91,7 @@ export const normalizeVideo = (
     comments: video.comments || [],
     commentsCount: video.commentsCount || 0,
     subscriberCount: video.subscriberCount || 0,
+    isSubscribed: video.isSubscribed ?? false , 
     currentUserReaction: video.currentUserReaction || null,
   };
 };

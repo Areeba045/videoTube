@@ -119,7 +119,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
       },
     },
     {
-      new: true,
+      returnDocument : "after",
     }
   );
 
@@ -175,7 +175,7 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
       },
     },
     {
-      new: true,
+      returnDocument : "after"
     }
   );
 
@@ -285,7 +285,7 @@ const updatePlaylist = asyncHandler(async (req, res) => {
       $set: updateData,
     },
     {
-      new: true,
+      returnDocument : "after",
       runValidators: true,
     }
   );

@@ -19,24 +19,73 @@ import { logoutUser, getCurrentUser } from "./services/userApi.ts";
 import { PlaylistProvider } from "@/contexts/PlaylistContext";
 import { usePlaylists } from "@/contexts/PlaylistContext";
 import { useVideos, VideoProvider } from "@/contexts/VideoContext";
+import { SubscriptionProvider } from "./contexts/SubscriptionContext.tsx";
+import { useSubscriptions } from "./contexts/SubscriptionContext.tsx";
+import { LikeProvider, useLike } from "./contexts/likeContext.tsx";
+import { CommentProvider } from "./contexts/CommentsContext.tsx";
 
 function AppContent() {
+  const {
+    playlists,
+    createPlaylist,
+    addVideoToPlaylist,
+    removeVideoFromPlaylist,
+    fetchUserPlaylists,
+    updatePlaylist,
+    deletePlaylist,
+  } = usePlaylists();
+
+  const { likedVideos, loadLikedVideos } = useLike();
   const { showToast } = useToast();
-  const { playlists, saveToPlaylist, removeFromPlaylist, createPlaylist } =
-    usePlaylists();
   const { publishVideo, deleteVideo } = useVideos();
-  const handleSaveToPlaylist = saveToPlaylist;
-  const handleRemoveFromPlaylist = removeFromPlaylist;
-  const handleCreatePlaylist = createPlaylist;
+  const { fetchSubscribedChannels, clearSubscriptions } = useSubscriptions();
+  // const handleSaveToPlaylist = addVideoToPlaylist ;
+  // const handleRemoveFromPlaylist =removeVideoFromPlaylist t;
+  // const handleCreatePlaylist = createPlaylist;
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [likedVideos] = useState<Set<string>>(new Set(["v3", "v6"]));
+  // const [likedVideos] = useState<Set<string>>(new Set(["v3", "v6"]));
   const [defaultPublishPrivacy, setDefaultPublishPrivacy] =
     useState<Privacy>("public");
+  const currentUser = authUser;
+  // const { fetchUserPlaylists } = usePlaylists();
 
+  const handleCreatePlaylist = async (name: string, description: string) => {
+    try {
+      await createPlaylist(name, description);
+      showToast("Playlist created SucccessFully !");
+    } catch (error) {
+      console.error("Create Playlist error : ", error);
+      showToast("Failed to create Plalylist");
+    }
+    // await createPlaylist(name, description);
+  };
+
+  const handleSaveToPlaylist = async (PlaylistId: string, videoId: string) => {
+    try {
+      await addVideoToPlaylist(PlaylistId, videoId);
+      showToast("Video saved to Playlist!");
+    } catch (error) {
+      console.error("Save video error: ", error);
+      showToast("Failed to save Video", "error");
+    }
+  };
+
+  const handleRemoveFromPlaylist = async (
+    playlistId: string,
+    videoId: string,
+  ) => {
+    try {
+      await removeVideoFromPlaylist(playlistId, videoId);
+      showToast("video Removed from Playlist", "info");
+    } catch (error) {
+      console.error("Remove video error:", error);
+      showToast("Failed to remove video", "error");
+    }
+  };
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -49,11 +98,31 @@ function AppContent() {
     loadUser();
   }, []);
 
-  const currentUser = authUser;
+  useEffect(() => {
+    if (!currentUser?.id) {
+      clearSubscriptions();
+      return;
+    }
+
+    fetchSubscribedChannels();
+  }, [currentUser, fetchSubscribedChannels, clearSubscriptions]);
+
   const allUsers = useMemo(
     () => [...(currentUser ? [currentUser] : []), ...users],
     [currentUser],
   );
+
+  useEffect(() => {
+    if (!currentUser?.id) return;
+
+    fetchUserPlaylists(currentUser.id);
+  }, [currentUser, fetchUserPlaylists]);
+
+  useEffect(() => {
+    if (!currentUser?.id) return;
+
+    loadLikedVideos();
+  }, [currentUser, loadLikedVideos]);
 
   const getUserById = useCallback(
     (id: string) => allUsers.find((u) => u?.id === id),
@@ -87,7 +156,14 @@ function AppContent() {
       setSidebarOpen(!sidebarOpen);
     }
   };
-
+  const likedVideoIds = useMemo(() => {
+    return new Set(
+      likedVideos
+        .map((item: any) => item.video?._id || item.video?.id)
+        .filter(Boolean)
+        .map(String),
+    );
+  }, [likedVideos]);
   return (
     <div className="min-h-screen bg-base">
       <Header
@@ -124,17 +200,16 @@ function AppContent() {
             <Route
               path="/watch/:videoId"
               element={
-                currentUser ? (
-                  <VideoDetailPage
-                    currentUser={currentUser}
-                    playlists={playlists}
-                    getUserById={getUserById}
-                    onSaveToPlaylist={handleSaveToPlaylist}
-                    onCreatePlaylist={handleCreatePlaylist}
-                  />
-                ) : (
-                  <Navigate to="/" replace />
-                )
+                <VideoDetailPage
+                  currentUser={currentUser}
+                  playlists={playlists}
+                  getUserById={getUserById}
+                  onSaveToPlaylist={handleSaveToPlaylist}
+                  onCreatePlaylist={handleCreatePlaylist}
+                />
+                // ) : (
+                //   <Navigate to="/" replace />
+                // )
               }
             />
             <Route
@@ -150,7 +225,10 @@ function AppContent() {
                 />
               }
             />
-            <Route path="/subscriptions" element={<SubscriptionsPage />} />
+            <Route
+              path="/subscriptions"
+              element={<SubscriptionsPage currentUser={currentUser} />}
+            />
             <Route
               path="/settings"
               element={
@@ -169,7 +247,7 @@ function AppContent() {
               path="/channel/:channelId"
               element={
                 <ChannelPage
-                  channel={currentUser || mockCurrentUser}
+                  channel={currentUser}
                   // videos={[]}
                   currentUser={currentUser}
                   isSubscribed={false}
@@ -191,6 +269,8 @@ function AppContent() {
                   onSaveToPlaylist={handleSaveToPlaylist}
                   onRemoveFromPlaylist={handleRemoveFromPlaylist}
                   onCreatePlaylist={handleCreatePlaylist}
+                  onDeletePlaylist={deletePlaylist}
+                  onUpdatePlaylist={updatePlaylist}
                 />
               }
             />
@@ -199,12 +279,14 @@ function AppContent() {
               element={
                 <LibraryPage
                   mode="liked"
-                  likedVideoIds={likedVideos}
+                  likedVideoIds={likedVideoIds}
                   playlists={playlists}
                   getUserById={getUserById}
                   onSaveToPlaylist={handleSaveToPlaylist}
                   onRemoveFromPlaylist={handleRemoveFromPlaylist}
                   onCreatePlaylist={handleCreatePlaylist}
+                  onDeletePlaylist={deletePlaylist}
+                  onUpdatePlaylist={updatePlaylist}
                 />
               }
             />
@@ -219,6 +301,8 @@ function AppContent() {
                   onSaveToPlaylist={handleSaveToPlaylist}
                   onRemoveFromPlaylist={handleRemoveFromPlaylist}
                   onCreatePlaylist={handleCreatePlaylist}
+                  onDeletePlaylist={deletePlaylist}
+                  onUpdatePlaylist={updatePlaylist}
                 />
               }
             />
@@ -256,9 +340,15 @@ export default function App() {
       <ThemeProvider>
         <ToastProvider>
           <PlaylistProvider>
-            <VideoProvider>
-              <AppContent />
-            </VideoProvider>
+            <SubscriptionProvider>
+              <LikeProvider>
+                <CommentProvider>
+                  <VideoProvider>
+                    <AppContent />
+                  </VideoProvider>
+                </CommentProvider>
+              </LikeProvider>
+            </SubscriptionProvider>
           </PlaylistProvider>
         </ToastProvider>
       </ThemeProvider>

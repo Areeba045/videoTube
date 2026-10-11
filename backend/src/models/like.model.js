@@ -23,7 +23,36 @@ const likeSchema = new Schema(
       ref: "Tweet",
     },
   },
-  { timeStamps: true }
+  { timestamps: true }
 );
+
+// A user can have only one reaction per video.
+likeSchema.index(
+  { video :  1 , likedBy : 1 } ,
+  { unique : true ,
+    partialFilterExpression : { video : {$type: "objectId"}},
+  }
+);
+
+// A user can have only one reaction per comment.
+likeSchema.index(
+  { comment: 1, likedBy: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { comment: { $type: "objectId" } },
+  }
+);
+
+
+
+// A user can have only one reaction per tweet.
+// likeSchema.index(
+//   { tweet: 1, likedBy: 1 },
+//   {
+//     unique: true,
+//     partialFilterExpression: { tweet: { $type: "objectId" } },
+//   }
+// );
+
 
 export const Like = mongoose.model("Like", likeSchema);

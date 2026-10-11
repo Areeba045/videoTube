@@ -1,44 +1,66 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Rss } from "lucide-react";
-import type { User } from "@/types";
-import { getSubscribedChannels } from "@/services/userApi";
 import { formatSubscribers } from "@/utils/format";
+import { useSubscriptions } from '@/contexts/subscriptionContext'
+import type { User} from '@/types';
 
-export default function SubscriptionsPage() {
+interface SubscriptionPageProps {
+	currentUser : User | null;
+	
+}
+export default function SubscriptionsPage(
+	{ currentUser} : SubscriptionPageProps
+) {
 	const navigate = useNavigate();
-	const [subscribedChannels, setSubscribedChannels] = useState<User[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState("");
+	const { subscribedChannels , loading , error , fetchSubscribedChannels } = useSubscriptions()
+	// const [subscribedChannels, setSubscribedChannels] = useState<User[]>([]);
+	// const [loading, setLoading] = useState(true);
+	// const [error, setError] = useState("");
+
 
 	useEffect(() => {
-		let cancelled = false;
+		if(currentUser){
+			fetchSubscribedChannels()
+		}
+		
+	} ,[currentUser])
+	// useEffect(() => {
+	// 	let cancelled = false;
 
-		const loadSubscriptions = async () => {
-			try {
-				setLoading(true);
-				setError("");
-				const channels = await getSubscribedChannels();
-				if (!cancelled) setSubscribedChannels(channels);
-			} catch (requestError) {
-				if (!cancelled) {
-					setError(
-						requestError instanceof Error
-							? requestError.message
-							: "Failed to load subscriptions",
-					);
-				}
-			} finally {
-				if (!cancelled) setLoading(false);
-			}
-		};
+	// 	const loadSubscriptions = async () => {
+	// 		try {
+	// 			setLoading(true);
+	// 			setError("");
+	// 			const channels = await getSubscribedChannels();
+	// 			if (!cancelled) setSubscribedChannels(channels);
+	// 		} catch (requestError) {
+	// 			if (!cancelled) {
+	// 				setError(
+	// 					requestError instanceof Error
+	// 						? requestError.message
+	// 						: "Failed to load subscriptions",
+	// 				);
+	// 			}
+	// 		} finally {
+	// 			if (!cancelled) setLoading(false);
+	// 		}
+	// 	};
 
-		loadSubscriptions();
-		return () => {
-			cancelled = true;
-		};
-	}, []);
+	// 	loadSubscriptions();
+	// 	return () => {
+	// 		cancelled = true;
+	// 	};
+	// }, []);
 
+
+// 	if (!currentUser) {
+//   return (
+//     <div className="py-24 text-center text-sm text-secondary-custom">
+//       Please login to view your subscriptions.
+//     </div>
+//   );
+// } 
 	if (loading) {
 		return <div className="py-24 text-center text-sm text-secondary-custom">Loading subscriptions...</div>;
 	}

@@ -197,7 +197,7 @@ const logoutUser = asyncHandler(async (req, res) => {
       },
     },
     {
-      new: true,
+      returnDocument : "after"
     }
   );
 
@@ -304,7 +304,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         username: username,
       },
     },
-    { new: true } //update hone k bad info return hoti ha
+    { returnDocument : "after" } //update hone k bad info return hoti ha
   ).select("-password");
 
   return res
@@ -331,7 +331,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
       $set: { avatar: avatar.url },
     },
     {
-      new: true,
+      returnDocument : "after"
     }
   ).select("-password");
 
@@ -357,7 +357,7 @@ const updateCoverImage = asyncHandler(async (req, res) => {
       $set: { coverImage: coverImage.url },
     },
     {
-      new: true,
+      returnDocument : "after"
     }
   ).select("-password");
 
@@ -445,58 +445,190 @@ const updateCoverImage = asyncHandler(async (req, res) => {
 
 // sub pipelines
 
+// const getWatchHistory = asyncHandler(async (req, res) => {
+//   const user = await User.aggregate([
+//     {
+//       $match: {
+//         _id: new mongoose.Types.ObjectId(req.user._id), // string id ko mongodb ki object id me convert karna
+//       },
+//     },
+//     {
+//       $lookup: {
+//         from: "videos",
+//         localField: "watchHistory",
+//         foreignField: "_id",
+//         as: "watchHistory",
+//         pipeline: [
+//           {
+//             $lookup: {
+//               from: "users",
+//               localField: "owner",
+//               foreignField: "_id",
+//               as: "owner",
+//               pipeline: [
+//                 {
+//                   $project: {
+//                     fullName: 1,
+//                     username: 1,
+//                     avatar: 1,
+//                   },
+//                 },
+//               ],
+//             },
+//           },
+//           {
+//             $addFields: {
+//               owner: {
+//                 $first: "$owner",
+//               },
+//             },
+//           },
+//         ],
+//       },
+//     },
+//   ]);
+
+//   return res
+//     .status(200)
+//     .json(
+//       new ApiResponse(
+//         200,
+//         user[0]?.watchHistory,
+//         "WatchHistory fetched successfully"
+//       )
+//     );
+// });
+
+
 const getWatchHistory = asyncHandler(async (req, res) => {
   const user = await User.aggregate([
     {
       $match: {
-        _id: new mongoose.Types.ObjectId(req.user._id), // string id ko mongodb ki object id me convert karna
+        _id: new mongoose.Types.ObjectId(req.user._id),
+      },
+    },
+    {
+      $unwind: "$watchHistory",
+    },
+    {
+      $sort: {
+        "watchHistory.watchedAt": -1,
       },
     },
     {
       $lookup: {
         from: "videos",
-        localField: "watchHistory",
+        localField: "watchHistory.video",
         foreignField: "_id",
-        as: "watchHistory",
+        as: "video",
+      },
+    },
+    {
+      $unwind: "$video",
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "video.owner",
+        foreignField: "_id",
+        as: "owner",
         pipeline: [
           {
-            $lookup: {
-              from: "users",
-              localField: "owner",
-              foreignField: "_id",
-              as: "owner",
-              pipeline: [
-                {
-                  $project: {
-                    fullName: 1,
-                    username: 1,
-                    avatar: 1,
-                  },
-                },
-              ],
-            },
-          },
-          {
-            $addFields: {
-              owner: {
-                $first: "$owner",
-              },
+            $project: {
+              fullName: 1,
+              username: 1,
+              avatar: 1,
             },
           },
         ],
       },
     },
+    {
+      $addFields: {
+        "video.owner": {
+          $first: "$owner",
+        },
+        "video.watchedAt": "$watchHistory.watchedAt",
+            "video.historyId": "$watchHistory._id",
+      },
+    },
+
+    {
+      $replaceRoot: {
+        newRoot: "$video",
+      },
+    },
   ]);
 
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        user[0]?.watchHistory,
-        "WatchHistory fetched successfully"
-      )
-    );
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      user,
+      "WatchHistory fetched successfully"
+    )
+  );
+});
+
+
+// const removeFromWatchHistory = asyncHandler(async (req, res) => {
+//   const { videoId } = req.params;
+
+//   await User.findByIdAndUpdate(
+//     req.user._id,
+//     {
+//       $pull: {
+//         watchHistory: {
+//           video: new mongoose.Types.ObjectId(videoId),
+//         },
+//       },
+//     },
+//   );
+
+//   return res.status(200).json(
+//     new ApiResponse(200, null, "Video removed from watch history"),
+//   );
+// });
+
+const removeFromWatchHistory = asyncHandler(async (req, res) => {
+  const { historyId } = req.params;
+
+  if (!mongoose.isValidObjectId(historyId)) {
+    throw new ApiError(400, "Invalid history entry ID");
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $pull: {
+        watchHistory: {
+          _id: new mongoose.Types.ObjectId(historyId),
+        },
+      },
+    },
+    { new: true },
+  );
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, null, "History entry removed successfully"),
+  );
+});
+
+
+const clearWatchHistory = asyncHandler(async (req, res) => {
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: { watchHistory: [] },
+    },
+  );
+
+  return res.status(200).json(
+    new ApiResponse(200, null, "Watch history cleared successfully"),
+  );
 });
 
 const getUserChannelProfile = asyncHandler(async (req, res) => {
@@ -586,6 +718,26 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     )
   );
 });
+
+const addToWatchHistory = asyncHandler(async (req , res) => {
+  const { videoId } = req.params ;
+
+  await User.findByIdAndUpdate(
+    req.user._id , 
+    {
+      $push :{
+        watchHistory : {
+          video : videoId ,
+          watchedAt : new Date(),
+        }
+      }
+    }
+  )
+
+  return res.status(200).json(
+    new ApiResponse(200 , null , "Video added to Watch History ")
+  )
+})
 export {
   registerUser,
   loginUser,
@@ -598,4 +750,7 @@ export {
   getUserChannelProfile,
   getWatchHistory,
   updateCoverImage,
+  addToWatchHistory ,
+  removeFromWatchHistory,
+  clearWatchHistory,
 };

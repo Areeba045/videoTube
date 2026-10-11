@@ -18,14 +18,14 @@ import type { User, Video } from "@/types";
 import { formatViews, formatSubscribers } from "@/utils/format";
 // import {  updateVideo } from "@/services/videoApi";
 import { getChannelProfile, normalizeUser } from "@/services/userApi";
-import { api } from "@/utils/api";
+// import { api } from "@/utils/api";
 import { useToast } from "@/components/Toast";
+import { useSubscriptions } from "@/contexts/subscriptionContext.tsx";
 
 interface ChannelPageProps {
-  channel: User;
+  channel: User | null;
   // videos: Video[];
   currentUser: User | null;
-  isSubscribed: boolean;
   onUploadClick?: () => void;
   onDeleteVideo?: (videoId: string) => void;
 }
@@ -34,7 +34,6 @@ export default function ChannelPage({
   channel,
   // videos,
   currentUser,
-  isSubscribed,
   onDeleteVideo,
   onUploadClick,
 }: ChannelPageProps) {
@@ -53,11 +52,17 @@ export default function ChannelPage({
   const [, setEditVideoUrl] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   //   const [fetchedVideos, setFetchedVideos] = useState<Video[]>([]);
-  const [displayedChannel, setDisplayedChannel] = useState<User>(
+  const [displayedChannel, setDisplayedChannel] = useState<User | null>(
     currentUser || channel,
   );
-  const [subscribed, setSubscribed] = useState(isSubscribed);
+  // const [subscribed, setSubscribed] = useState(isSubscribed);
 
+  const {
+    toggleSubscription: toggleSubscriptionContext,
+    isSubscribed,
+    subscriberCounts,
+    fetchSubscriberCount,
+  } = useSubscriptions();
   const {
     video: allVideos,
     myVideos,
@@ -66,17 +71,48 @@ export default function ChannelPage({
     togglePublish,
   } = useVideos();
 
+  //   useEffect(() => {
+  //   setSubscribed(isSubscribed);
+  // }, [isSubscribed]);
   //   const isOwner = currentUser?.id === displayedChannel.id;
   const isOwner =
     !!currentUser &&
     !!displayedChannel &&
     currentUser.id === displayedChannel.id;
 
+  // async function toggleSubscription() {
+  //   if(!displayedChannel) return ;
+  //   const next = !subscribed;
+  //   setSubscribed(next);
+  //   await api.toggleSubscribe(displayedChannel.id);
+  //   showToast(next ? "Subscribed!" : "Unsubscribed", next ? "success" : "info");
+  // }
+
+  useEffect(() => {
+    if (!displayedChannel?.id) return;
+
+    fetchSubscriberCount(displayedChannel.id);
+  }, [displayedChannel?.id, fetchSubscriberCount]);
+
   async function toggleSubscription() {
-    const next = !subscribed;
-    setSubscribed(next);
-    await api.toggleSubscribe(displayedChannel.id);
-    showToast(next ? "Subscribed!" : "Unsubscribed", next ? "success" : "info");
+    if (!displayedChannel) return;
+
+    try {
+      const next = await toggleSubscriptionContext(displayedChannel.id);
+
+      //  setSubscribed(next);
+
+      // await fetchSubscriberCount(displayedChannel.id);
+
+      showToast(
+        next ? "Subscribed!" : "Unsubscribed",
+        next ? "success" : "info",
+      );
+    } catch (error) {
+      console.error("Subscription failed:", error);
+
+      showToast("Failed to update subscription", "error");
+    }
   }
   useEffect(() => {
     if (!channelId) return;
@@ -95,6 +131,7 @@ export default function ChannelPage({
       .catch((error) => {
         //   setDisplayedChannel(null);
         console.error("Failed to load channel:", error);
+        setDisplayedChannel(null);
       });
   }, [channelId, currentUser]);
   //   useEffect(() => {
@@ -135,6 +172,16 @@ export default function ChannelPage({
       owner: video.owner,
     })),
   );
+
+  //IMPORTANT
+  // DO NOT CALCULATE DISPLAYED VIDEOS UNTIL DISPLAYED CHANNEL EXISTS
+  if (!displayedChannel) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <p className="text-secondary-custom">Loading channel....</p>
+      </div>
+    );
+  }
 
   const displayedVideos = isOwner
     ? myVideos
@@ -267,7 +314,9 @@ export default function ChannelPage({
           <div className="flex items-center gap-3 mt-1.5 text-xs sm:text-sm text-secondary-custom">
             <span className="flex items-center gap-1">
               <Users className="w-3.5 h-3.5" />
-              {formatSubscribers(displayedChannel.subscribers)} subscribers
+              {/* {formatSubscribers(displayedChannel.subscribers)} subscribers */}
+              {formatSubscribers(subscriberCounts[displayedChannel.id] ?? 0)}{" "}
+              subscribers
             </span>
             <span className="flex items-center gap-1">
               <VideoIcon className="w-3.5 h-3.5" />
@@ -288,9 +337,12 @@ export default function ChannelPage({
         ) : (
           <button
             onClick={toggleSubscription}
-            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 shadow-md shrink-0 ${subscribed ? "bg-elevated text-primary-custom hover:bg-hover" : "bg-primary text-white hover:bg-primary-700"}`}
+            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 shadow-md shrink-0 ${isSubscribed(displayedChannel.id) ? "bg-elevated text-primary-custom hover:bg-hover" : "bg-primary text-white hover:bg-primary-700"} `}
+            //  ${subscribed ? "bg-elevated text-primary-custom hover:bg-hover" : "bg-primary text-white hover:bg-primary-700"}
           >
-            {subscribed ? "Subscribed" : "Subscribe"}
+            {/* {subscribed ? "Subscribed" : "Subscribe"} */}
+            {/* {subscribed ? "Unsubscribe" : "Subscribe"} */}
+            {isSubscribed(displayedChannel.id) ? "Unsubscribe" : "Subscribe"}
           </button>
         )}
       </div>

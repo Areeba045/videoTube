@@ -12,7 +12,7 @@ import {
 } from "../utils/cloudinary.js";
 
 const uploadVideos = asyncHandler(async (req, res) => {
-  const { title, description  , isPublished } = req.body;
+  const { title, description, isPublished } = req.body;
   //TODO :  GET VIDEO , UPLOADON CLOUDINARY , CREATE VIDEO
 
   // get videos details from frontend
@@ -22,13 +22,12 @@ const uploadVideos = asyncHandler(async (req, res) => {
   // create video object - create entry in db
   // check for video creation
   // return response
- 
-    console.log("========== VIDEO UPLOAD ==========");
-    console.log("BODY:", req.body);
-    console.log("FILES:", req.files);
-    console.log("USER:", req.user);
 
-    
+  console.log("========== VIDEO UPLOAD ==========");
+  console.log("BODY:", req.body);
+  console.log("FILES:", req.files);
+  console.log("USER:", req.user);
+
   if (!title?.trim() || !description?.trim()) {
     throw new ApiError(400, "All Fields are required !");
   }
@@ -57,7 +56,6 @@ const uploadVideos = asyncHandler(async (req, res) => {
 
   const publishedStatus = isPublished === "true";
 
-
   const video = await Video.create({
     title,
     description,
@@ -67,7 +65,7 @@ const uploadVideos = asyncHandler(async (req, res) => {
     duration: uploadedvideo.duration,
     videoPublicId: uploadedvideo.public_id,
     thumbnailPublicId: uploadedthumbnail.public_id,
-    isPublished : publishedStatus
+    isPublished: publishedStatus,
   });
 
   if (!video) {
@@ -104,7 +102,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
     // newest videos first
     {
       $sort: {
-        createdAt : -1
+        createdAt: -1,
         // [sortBy]: sortType === "asc" ? 1 : -1,
       },
     }, //pagination
@@ -117,15 +115,15 @@ const getAllVideos = asyncHandler(async (req, res) => {
     {
       $project: {
         title: 1,
-        video : 1 ,
-        description : 1 ,
-        isPublished : 1 , 
+        video: 1,
+        description: 1,
+        isPublished: 1,
         duration: 1,
         thumbnail: 1,
         createdAt: 1,
         views: 1,
         owner: {
-          _id : 1 ,
+          _id: 1,
           username: 1,
           fullName: 1,
           avatar: 1,
@@ -143,6 +141,8 @@ const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   //TODO : GET VIDEO BY ID
 
+  const currentUserId = req.user?._id ? new mongoose.Types.ObjectId(req.user._id) : null ;
+
   if (!isValidObjectId(videoId)) {
     throw new Api(400, "This videoId is not exists");
   }
@@ -158,7 +158,7 @@ const getVideoById = asyncHandler(async (req, res) => {
     {
       $inc: { views: 1 },
     },
-    { new: true }
+    { returnDocument: "after" }
   );
 
   if (!updateVideo) {
@@ -214,6 +214,15 @@ const getVideoById = asyncHandler(async (req, res) => {
         commentsCount: {
           $size: "$comments",
         },
+        isSubscribed : {
+          $cond : {
+            if : { $eq : [currentUserId , null]} ,
+            then :  false ,
+            else : {
+              $in : [currentUserId , "$subscriber.subscriber"]
+            }
+          }
+        } ,
         likesCount: {
           $size: {
             $filter: {
@@ -221,6 +230,17 @@ const getVideoById = asyncHandler(async (req, res) => {
               as: "like",
               cond: {
                 $eq: ["$$like.reactionType", "like"],
+              },
+            },
+          },
+        },
+        dislikeCount: {
+          $size: {
+            $filter: {
+              input: "$likes",
+              as: "like",
+              cond: {
+                $eq: ["$$like.reactionType", "dislike"],
               },
             },
           },
@@ -235,7 +255,7 @@ const getVideoById = asyncHandler(async (req, res) => {
                       input: "$likes",
                       as: "like",
                       cond: {
-                        $eq: ["$$like.likedBy", req.user._id],
+                        $eq: ["$$like.likedBy", currentUserId],
                       },
                     },
                   },
@@ -262,15 +282,21 @@ const getVideoById = asyncHandler(async (req, res) => {
         views: 1,
         createdAt: 1,
         comments: 1,
+        isPublished: 1,
+
         owner: {
+          _id: 1,
           username: 1,
           avatar: 1,
           fullName: 1,
         },
+
         likesCount: 1,
         commentsCount: 1,
         subscriberCount: 1,
         currentUserReaction: 1,
+        dislikeCount: 1,
+        isSubscribed : 1 , 
       },
     },
   ]);
@@ -342,7 +368,7 @@ const updateVideos = asyncHandler(async (req, res) => {
   }
 
   const update = await Video.findByIdAndUpdate(videoId, updateData, {
-    new: true,
+    returnDocument: "after",
   });
 
   return res
@@ -474,64 +500,59 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     );
 });
 
-
 const getMyVideos = asyncHandler(async (req, res) => {
-    const videos = await Video.aggregate([
-        {
-            $match: {
-                owner: new mongoose.Types.ObjectId(req.user?._id),
-            },
+  const videos = await Video.aggregate([
+    {
+      $match: {
+        owner: new mongoose.Types.ObjectId(req.user?._id),
+      },
+    },
+
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+      },
+    },
+
+    {
+      $unwind: "$owner",
+    },
+
+    {
+      $project: {
+        _id: 1,
+        title: 1,
+        description: 1,
+        thumbnail: 1,
+        video: 1,
+        duration: 1,
+        views: 1,
+        createdAt: 1,
+        isPublished: 1,
+
+        owner: {
+          _id: 1,
+          fullName: 1,
+          username: 1,
+          avatar: 1,
+          coverImage: 1,
         },
+      },
+    },
 
-        {
-            $lookup: {
-                from: "users",
-                localField: "owner",
-                foreignField: "_id",
-                as: "owner",
-            },
-        },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+  ]);
 
-        {
-            $unwind: "$owner",
-        },
-
-        {
-            $project: {
-                _id: 1,
-                title: 1,
-                description: 1,
-                thumbnail: 1,
-                video: 1,
-                duration: 1,
-                views: 1,
-                createdAt: 1,
-                isPublished: 1,
-
-                owner: {
-                    _id: 1,
-                    fullName: 1,
-                    username: 1,
-                    avatar: 1,
-                    coverImage: 1,
-                },
-            },
-        },
-
-        {
-            $sort: {
-                createdAt: -1,
-            },
-        },
-    ]);
-
-    return res.status(200).json(
-        new ApiResponse(
-            200,
-            videos,
-            "My videos fetched successfully"
-        )
-    );
+  return res
+    .status(200)
+    .json(new ApiResponse(200, videos, "My videos fetched successfully"));
 });
 export {
   updateVideos,

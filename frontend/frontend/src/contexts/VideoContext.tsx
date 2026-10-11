@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState , useCallback } from "react";
 import type { Video } from "@/types";
 
 import {
@@ -12,7 +12,7 @@ import {
 } from "../services/videoApi.ts";
 
 import { useToast } from "@/components/Toast.tsx";
-import { currentUser } from "@/data.ts";
+// import { currentUser } from "@/data.ts";
 // import { currentUser } from "@/data.ts";
 
 interface PublishData {
@@ -41,6 +41,7 @@ interface VideoContextValue {
   deleteVideo: (videoId: string) => Promise<void>;
   updateVideo: (videoId: string, data: UpdateVideoData) => Promise<void>;
   togglePublish: (videoId: string) => Promise<void>;
+  updateVideoViews: (videoId: string, views: number) => void;
 }
 
 const VideoContext = createContext<VideoContextValue | null>(null);
@@ -249,6 +250,46 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+
+// function updateVideoViews(videoId: string, views: number) {
+//   setVideos((currentVideos) =>
+//     currentVideos.map((video) =>
+//       video.id === videoId
+//         ? { ...video, views }
+//         : video,
+//     ),
+//   );
+
+//   setMyVideos((currentVideos) =>
+//     currentVideos.map((video) =>
+//       video.id === videoId
+//         ? { ...video, views }
+//         : video,
+//     ),
+//   );
+// }
+
+const updateVideoViews = useCallback(
+  (videoId: string, views: number) => {
+    setVideos((currentVideos) =>
+      currentVideos.map((video) =>
+        video.id === videoId
+          ? { ...video, views }
+          : video,
+      ),
+    );
+
+    setMyVideos((currentVideos) =>
+      currentVideos.map((video) =>
+        video.id === videoId
+          ? { ...video, views }
+          : video,
+      ),
+    );
+  },
+  [],
+);
+
   return (
     <VideoContext.Provider
       value={{
@@ -262,6 +303,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
         deleteVideo,
         updateVideo,
         togglePublish,
+        updateVideoViews ,
       }}
     >
       {children}

@@ -4,7 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Subscription } from "../models/subscription.model.js";
-import { populate } from "dotenv";
+
 
 const toggleSubscription = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
@@ -62,51 +62,68 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
 
   if (!isValidObjectId(channelId)) {
-    throw new ApiError(400 , "Invalid Channel ID ");
+    throw new ApiError(400, "Invalid Channel ID ");
   }
 
-  const Subscriber = await Subscription.find({
+  const subscriberCount = await Subscription.countDocuments({
     channel: channelId,
-  }).populate("subscriber");
-
+  });
 
   return res.status(200).json(
-    new ApiResponse(200 , Subscriber , "fetched All Subscriber successfully ")
-  )
+    new ApiResponse(
+      200,
+      {
+        subscriberCount,
+      },
+      "fetched All Subscriber successfully "
+    )
+  );
 });
 
 const getSubscribedChannels = asyncHandler(async (req, res) => {
- 
+  if (!req.user?._id) {
+  throw new ApiError(401, "Unauthorized request");
+}
+
   const subscribedChannels = await Subscription.aggregate([
     {
       $match: {
-        subscriber :  new mongoose.Types.ObjectId(req.user._id)
-      }
+        subscriber: new mongoose.Types.ObjectId(req.user._id),
+      },
     },
     {
-      $lookup : {
-        from : "users" ,
-        localField : "channel",
-        foreignField : "_id" ,
-        as : "channel"
-      }
+      $lookup: {
+        from: "users",
+        localField: "channel",
+        foreignField: "_id",
+        as: "channel",
+      },
     },
     {
-      $unwind : "$channel"
+      $unwind: "$channel",
     },
     {
-      $project : {
-        _id : 0 ,
-        channel : {
-          fullName : 1 ,
-          username : 1,
-          avatar : 1
-        }
-      }
-    }
-  ])
+      $project: {
+        _id: 0,
+        channel: {
+          _id: 1,
+          fullName: 1,
+          username: 1,
+          avatar: 1,
+        },
+      },
+    },
+  ]);
 
- return res.status(200).json( new ApiResponse(200 , subscribedChannels , "Fetched subscribed channels successfully "))
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        subscribedChannels,
+        "Fetched subscribed channels successfully "
+      )
+    );
 });
 
 export { toggleSubscription, getUserChannelSubscribers, getSubscribedChannels };
