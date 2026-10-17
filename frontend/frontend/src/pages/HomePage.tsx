@@ -30,15 +30,15 @@ export default function HomePage({
 
   const { video: videos, loading, error } = useVideos();
 
-  console.log(
-    "VIDEOS AFTER NORMALIZE:",
-    videos.map((video) => ({
-      title: video.title,
-      owner: video.owner?.username,
-      channelId: video.channelId,
-      privacy: video.privacy,
-    })),
-  );
+  // console.log(
+  //   "VIDEOS AFTER NORMALIZE:",
+  //   videos.map((video) => ({
+  //     title: video.title,
+  //     owner: video.owner?.username,
+  //     channelId: video.channelId,
+  //     privacy: video.privacy,
+  //   })),
+  // );
 
   const displayedVideos = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();

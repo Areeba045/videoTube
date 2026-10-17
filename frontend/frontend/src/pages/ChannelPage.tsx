@@ -112,13 +112,13 @@ export default function ChannelPage({
       });
   }, [channelId, currentUser]);
 
-  console.log("========== CHANNEL DEBUG ==========");
+  // console.log("========== CHANNEL DEBUG ==========");
 
-  console.log("displayedChannel:", displayedChannel);
+  // console.log("displayedChannel:", displayedChannel);
 
-  console.log("displayedChannel.id:", displayedChannel?.id);
+  // console.log("displayedChannel.id:", displayedChannel?.id);
 
-  console.log("videos from props:", allVideos);
+  // console.log("videos from props:", allVideos);
 
   console.log(
     "video channel IDs:",
@@ -148,7 +148,7 @@ export default function ChannelPage({
       );
  
 
-  console.log("FINAL displayedVideos:", displayedVideos);
+  // console.log("FINAL displayedVideos:", displayedVideos);
 
 
   function startEdit(video: Video) {

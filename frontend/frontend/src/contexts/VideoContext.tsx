@@ -79,7 +79,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
       setError("");
       const response = await getAllVideos(1, 50);
 
-      console.log("GET ALL VIDEOS RESPONSE : ", response);
+      // console.log("GET ALL VIDEOS RESPONSE : ", response);
       const normalizeVideos = (response.data || []).map(normalizeVideo);
       setVideos(normalizeVideos);
     } catch (error) {
@@ -109,7 +109,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
         data.video,
       );
 
-      console.log(" VIDEO UPLOAD RESPONSE : ", response);
+      // console.log(" VIDEO UPLOAD RESPONSE : ", response);
 
       const newVideo = normalizeVideo(response.data);
 

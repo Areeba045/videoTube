@@ -168,8 +168,8 @@ export default function HistoryPage({
           };
         });
 
-        console.log("WATCH HISTORY RESPONSE:", response.data);
-        console.log("NORMALIZED HISTORY:", normalizedVideos);
+        // console.log("WATCH HISTORY RESPONSE:", response.data);
+        // console.log("NORMALIZED HISTORY:", normalizedVideos);
 
         setVideos(normalizedVideos);
       })

@@ -50,10 +50,10 @@ export default function AuthModal({ onClose, onAuth }: AuthModalProps) {
       if (mode === "login") {
         const response = await loginUser(email, password);
 
-        console.log("LOGIN RESPONSE:", response);
+        // console.log("LOGIN RESPONSE:", response);
         const user = await getCurrentUser();
 
-        console.log("CURRENT USER : ", user);
+        // console.log("CURRENT USER : ", user);
 
         onAuth(user);
       } else {
@@ -70,15 +70,15 @@ export default function AuthModal({ onClose, onAuth }: AuthModalProps) {
 
         const response = await registerUser(formData);
 
-        console.log("REGISTER RESPNSE : ", response);
+        // console.log("REGISTER RESPNSE : ", response);
 
         const loginResponse = await loginUser(email, password);
 
-        console.log("LOGIN AFTER REGISTER:", loginResponse);
+        // console.log("LOGIN AFTER REGISTER:", loginResponse);
 
         const userResponse = await getCurrentUser();
 
-        console.log("CURRENT USER AFTER REGISTER:", userResponse);
+        // console.log("CURRENT USER AFTER REGISTER:", userResponse);
         onAuth(userResponse);
       }
     } catch (error) {

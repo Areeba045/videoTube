@@ -91,7 +91,7 @@ export const LikeProvider = ({ children }: { children: ReactNode }) => {
         return next;
       });
 
-      console.log("LIKED VIDEOS RESPONSE:", likedData);
+      // console.log("LIKED VIDEOS RESPONSE:", likedData);
     } catch (error) {
       console.error("Failed to load liked videos:", error);
       setLikedVideos([]);

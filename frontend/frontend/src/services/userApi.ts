@@ -94,7 +94,7 @@ export const changePassword = async (
   oldPassword: string,
   newPassword: string,
 ) => {
-  console.log("ChangE Password API Called");
+  // console.log("ChangE Password API Called");
   const response = await apiFetch("/users/change-password", {
     method: "POST",
     headers: {
@@ -106,7 +106,7 @@ export const changePassword = async (
     }),
   });
 
-  console.log("CHANGE PASSWORD RESPONSE: ", response);
+  // console.log("CHANGE PASSWORD RESPONSE: ", response);
 
   return response;
 };

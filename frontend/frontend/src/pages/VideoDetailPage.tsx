@@ -84,11 +84,11 @@ export default function VideoDetailPage({
         if (cancelled) return;
         const loadedVideo = normalizeVideo(videoResponse.data);
 
-        console.log("RAW VIDEO API RESPONSE:", videoResponse.data);
+        // console.log("RAW VIDEO API RESPONSE:", videoResponse.data);
 
-        console.log("BACKEND DISLIKE COUNT:", videoResponse.data.dislikeCount);
+        // console.log("BACKEND DISLIKE COUNT:", videoResponse.data.dislikeCount);
 
-        console.log("NORMALIZED VIDEO DISLIKES:", loadedVideo.dislikes);
+        // console.log("NORMALIZED VIDEO DISLIKES:", loadedVideo.dislikes);
 
         const loadedVideos = (allVideosResponse.data || []).map(normalizeVideo);
         setVideo(loadedVideo);
