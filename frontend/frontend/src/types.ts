@@ -75,7 +75,7 @@ export type ViewName =
   | "channel"
   | "settings";
 
-export type Privacy = "public" | "private" | "unlisted";
+export type Privacy = "public" | "private" ;
 
 export interface AuthUser {
   id: string;

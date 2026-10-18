@@ -337,11 +337,11 @@ function AppContent() {
       {showUploadModal && (
         <UploadModal
           onClose={() => setShowUploadModal(false)}
-          onPublish={async (data) => {
-            if (!currentUser) return;
-            await publishVideo(data);
-            setShowUploadModal(false);
-          }}
+          // onPublish={async (data) => {
+          //   if (!currentUser) return;
+          //   await publishVideo(data);
+          //   setShowUploadModal(false);
+          // }}
           defaultPrivacy={defaultPublishPrivacy}
         />
       )}

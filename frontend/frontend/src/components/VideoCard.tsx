@@ -28,7 +28,7 @@ interface VideoCardProps {
 
   onShare?: (videoId: string) => void;
 
-  onCreatePlaylist?: (name: string) => void;
+  onCreatePlaylist?: (name: string , description : string) => void;
 
   onNavigateChannel?: (channelId: string) => void;
 
@@ -100,7 +100,7 @@ export default function VideoCard({
 
   function handleCreatePlaylist() {
     if (newPlaylistName.trim() && onCreatePlaylist) {
-      onCreatePlaylist(newPlaylistName.trim());
+      onCreatePlaylist(newPlaylistName.trim() , "");
 
       setNewPlaylistName("");
       setShowCreatePlaylist(false);

@@ -43,7 +43,7 @@ interface VideoDetailProps {
   onAddReply: (commentId: string, text: string) => void;
   onLikeComment: (commentId: string, type: "like" | "dislike") => void;
   onSaveToPlaylist: (playlistId: string, videoId: string) => void;
-  onCreatePlaylist?: (name: string) => void;
+  onCreatePlaylist?: (name: string , description : string) => void;
   onShare: (videoId: string) => void;
   onEditComment?: (commentId: string, text: string) => void;
   onDeleteComment?: (commentId: string) => void;
@@ -838,7 +838,7 @@ export default function VideoDetail({
                                   e.key === "Enter" &&
                                   newPlaylistName.trim()
                                 ) {
-                                  onCreatePlaylist?.(newPlaylistName.trim());
+                                  onCreatePlaylist?.(newPlaylistName.trim() , "");
                                   setNewPlaylistName("");
                                   setShowCreatePlaylist(false);
                                 }
@@ -850,7 +850,7 @@ export default function VideoDetail({
                             <button
                               onClick={() => {
                                 if (newPlaylistName.trim()) {
-                                  onCreatePlaylist?.(newPlaylistName.trim());
+                                  onCreatePlaylist?.(newPlaylistName.trim() , "");
                                   setNewPlaylistName("");
                                   setShowCreatePlaylist(false);
                                 }

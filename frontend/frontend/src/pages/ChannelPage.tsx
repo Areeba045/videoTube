@@ -18,13 +18,14 @@ import type { User, Video } from "@/types";
 import { formatViews, formatSubscribers } from "@/utils/format";
 import { getChannelProfile, normalizeUser } from "@/services/userApi";
 import { useToast } from "@/components/Toast";
-import { useSubscriptions } from "@/contexts/subscriptionContext.tsx";
+import { useSubscriptions } from "@/contexts/SubscriptionContext.tsx";
 
 interface ChannelPageProps {
   channel: User | null;
   currentUser: User | null;
   onUploadClick?: () => void;
   onDeleteVideo?: (videoId: string) => void;
+    isSubscribed : boolean ;
 }
 
 export default function ChannelPage({
