@@ -5,6 +5,9 @@ import express from "express";
 import { DB_NAME } from "./constant.js";
 import ConnectDB from "./db/index.js";
 import app from "./app.js";
+import dns from "node:dns";
+
+dns.setServers(["8.8.8.8"]);
 
 // dotenv.config({ path: ".env" });
 
