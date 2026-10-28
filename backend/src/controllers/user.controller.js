@@ -171,8 +171,10 @@ const loginUser = asyncHandler(async (req, res) => {
 
   // send tokens in cookies , security purpose option
   const options = {
-    httpOnly: true, // ise se by default frintend pr koi bhi modified kr leta ha  lakin  ye srf server se hoti ha in options se
+    httpOnly: true,
     secure: true,
+    sameSite: "none",
+    path: "/",
   };
 
   return res
@@ -204,7 +206,10 @@ const logoutUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,
+    sameSite: "none",
+    path: "/",
   };
+
 
   return res
     .status(200)
@@ -237,10 +242,14 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       throw new ApiError(401, "Refresh Token is used or expired");
     }
 
-    const options = {
-      httpOnly: true,
-      secure: true,
-    };
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    path: "/",
+  };
+
     const { accessToken, newrefreshToken } = generateAccessAndRefreshTokens(
       user._id
     );
