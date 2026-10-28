@@ -22,6 +22,22 @@ app.use(express.static("public"));
 app.use(cookieParser());
 
 
+app.use(async (req, res, next) => {
+  try {
+    await ConnectDB();
+    next();
+  } catch (error) {
+    console.error("DATABASE CONNECTION FAILED:", error);
+
+    res.status(503).json({
+      success: false,
+      message: "Database connection unavailable",
+    });
+  }
+});
+
+
+
 //import routers
 import userRouter  from './router/user.router.js'
 import videoRouter from './router/video.router.js';
